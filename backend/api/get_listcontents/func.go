@@ -10,6 +10,7 @@ import (
 
 var gh = &http.Client{}
 
+// "/api/repos/google/truth/"
 func ListContents(c *gin.Context) {
 	owner := c.Param("owner")
 	repo := c.Param("repo")
@@ -38,3 +39,5 @@ func ListContents(c *gin.Context) {
 	c.Header("Cache-Control", "public, max-age=60")
 	io.Copy(c.Writer, res.Body)
 }
+
+// このファイルは統合されました。get_file_or_dir_detail/get_list.go をご利用ください。
