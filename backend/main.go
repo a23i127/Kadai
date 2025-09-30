@@ -12,7 +12,6 @@ func main() {
 	api := r.Group("/api")
 	{
 		api.GET("/orgs/repos", get_organization_google.ListGoogleRepos)
-		//api.GET("/repos/:owner/:repo/contents", get_listcontents.ListContents)
 		api.GET("/repos/:owner/:repo/contents/*path", get_file_or_dir_detail.GetFileOrDirContents)
 		api.GET("/repos/:owner/:repo/archive.zip", get_organization_google.ArchiveZip)
 	}
