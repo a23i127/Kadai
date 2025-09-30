@@ -40,3 +40,23 @@
 .read-the-docs {
   color: #888;
 }
+
+.organization-btn-wrapper {
+  margin-bottom: 60px;
+}
+.organization-btn {
+  width: 320px;
+  height: 64px;
+  font-size: 26px;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #6366f1 0%, #60a5fa 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(99,102,241,0.15);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.organization-btn:active {
+  transform: scale(0.97);
+}
