@@ -1,0 +1,38 @@
+{
+  "id": 1936771,
+  "name": "truth",
+  "full_name": "google/truth",
+  "default_branch": "master",
+  "description": "Fluent assertions for Java and Android",
+  "html_url": "https://github.com/google/truth",
+  "clone_url": "https://github.com/google/truth.git",
+  "ssh_url": "git@github.com:google/truth.git",
+  "stargazers_count": 2776,
+  "forks_count": 268,
+  "open_issues_count": 73,
+  "language": "Java",
+  "topics": [
+    "assertion-framework",
+    "java",
+    "junit",
+    "test-framework",
+    "testing-library",
+    "truth",
+    "unit-testing"
+  ],
+  "license": {
+    "key": "apache-2.0",
+    "name": "Apache License 2.0",
+    "spdx_id": "Apache-2.0",
+    "url": "https://api.github.com/licenses/apache-2.0"
+  },
+  "created_at": "2011-06-22T18:55:12Z",
+  "updated_at": "2025-09-29T17:53:43Z",
+  "pushed_at": "2025-09-29T17:56:25Z",
+  "owner": {
+    "login": "google",
+    "html_url": "https://github.com/google",
+    "type": "Organization",
+    "avatar_url": "https://avatars.githubusercontent.com/u/1342004?v=4"
+  }
+}

@@ -1,0 +1,18 @@
+{
+    "name": ".gitignore",
+    "path": ".gitignore",
+    "sha": "f0486befb6e09c52a0ab6e843339c060d74a77fb",
+    "size": 70,
+    "url": "https://api.github.com/repos/google/truth/contents/.gitignore?ref=master",
+    "html_url": "https://github.com/google/truth/blob/master/.gitignore",
+    "git_url": "https://api.github.com/repos/google/truth/git/blobs/f0486befb6e09c52a0ab6e843339c060d74a77fb",
+    "download_url": "https://raw.githubusercontent.com/google/truth/master/.gitignore",
+    "type": "file",
+    "content": "YmluCnRhcmdldAoucHJvamVjdAouY2xhc3NwYXRoCi5zZXR0aW5ncwouY2xv\ndmVyCi4qCiouaW1sCiouaXByCiouaXdzCg==\n",
+    "encoding": "base64",
+    "_links": {
+        "self": "https://api.github.com/repos/google/truth/contents/.gitignore?ref=master",
+        "git": "https://api.github.com/repos/google/truth/git/blobs/f0486befb6e09c52a0ab6e843339c060d74a77fb",
+        "html": "https://github.com/google/truth/blob/master/.gitignore"
+    }
+}
