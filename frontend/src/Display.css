@@ -1,0 +1,14 @@
+.display-area {
+  width: 950px;
+  height: 420px;
+  border-radius: 18px;
+  border: 2.5px solid #6366f1;
+  background: #fff;
+  box-shadow: 0 8px 32px rgba(99,102,241,0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  color: #6366f1;
+  font-weight: bold;
+}

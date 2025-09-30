@@ -1,0 +1,25 @@
+.repo-list {
+  width: 100%;
+  padding: 0;
+  list-style: none;
+}
+.repo-list-item {
+  margin: 12px 0;
+  font-size: 20px;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+.repo-link {
+  color: #6366f1;
+  font-weight: bold;
+  text-decoration: none;
+}
+.loading {
+  color: #6366f1;
+  font-size: 18px;
+}
+.error {
+  color: #e53e3e;
+  font-size: 16px;
+}
