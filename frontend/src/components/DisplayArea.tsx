@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Display.css";
 import { fetchReposWithState } from "../feacher/fetchFileData.tsx/fetchRepo";
 import { fetchFileOrDirContentsAction } from "../feacher/fetchFileData.tsx/fetchFileOrDirContents";
@@ -10,6 +11,7 @@ interface FileOrDir {
   url?: string;
   type?: "file" | "dir";
   path?: string;
+  content?: string;
 }
 
 const DisplayArea = () => {
@@ -19,6 +21,7 @@ const DisplayArea = () => {
   const [selectedItems, setSelectedItems] = useState<FileOrDir[]>([]);
   const [activeRepo, setActiveRepo] = useState<Repo | null>(null);
   const [currentPath, setCurrentPath] = useState<string>("");
+  const navigate = useNavigate();
 
   // リポジトリクリック時
   const handleRepoClick = async (repo: Repo) => {
@@ -38,6 +41,7 @@ const DisplayArea = () => {
 
   // ディレクトリ・ファイルクリック時
   const handleItemClick = async (item: FileOrDir) => {
+    console.log("Item clicked:", item);
     if (!activeRepo) return;
     if (item.type === "dir" && item.path) {
       setLoading(true);
@@ -51,18 +55,62 @@ const DisplayArea = () => {
         setSelectedItems([]);
       }
       setLoading(false);
-    } else if (item.type === "file" && item.url) {
-      window.open(item.url, "_blank");
+    } else if (item.type === "file" && item.url && item.path && activeRepo) {
+      setLoading(true);
+      setError("");
+      try {
+        // owner, repo, ref, pathを取得
+        const owner = activeRepo.owner.login;
+        const repoName = activeRepo.name;
+        const ref = activeRepo.default_branch;
+        const path = item.path;
+        // GitHub APIからファイルデータ取得
+        const url = `https://api.github.com/repos/${owner}/${repoName}/contents/${encodeURIComponent(path)}?ref=${ref}`;
+        const res = await fetch(url, { headers: { Accept: "application/vnd.github+json" }});
+        const data = await res.json(); // { type: "file", encoding: "base64", content: "..." }
+        let content = "";
+        if (data && data.type === "file" && data.encoding === "base64" && typeof data.content === "string") {
+          content = atob(data.content);
+        } else {
+          content = "ファイル内容の取得に失敗しました";
+        }
+        const fileWithContent: FileOrDir = {
+          name: item.name,
+          url: item.url,
+          type: item.type,
+          path: item.path,
+          content
+        };
+        setLoading(false);
+        navigate("/openfile", { state: { file: fileWithContent } });
+      } catch {
+        setLoading(false);
+        setError("ファイル内容の取得に失敗しました");
+      }
     }
   };
 
   // 戻る
   const handleBackClick = async () => {
-    if (!activeRepo) return;
+    if (!activeRepo) {
+      // リポジトリ一覧に戻る
+      setSelectedItems([]);
+      setCurrentPath("");
+      setActiveRepo(null);
+      return;
+    }
     setLoading(true);
     setError("");
     try {
       let parentPath = "";
+      if (currentPath === "") {
+        // ルートディレクトリならリポジトリ一覧に戻る
+        setSelectedItems([]);
+        setCurrentPath("");
+        setActiveRepo(null);
+        setLoading(false);
+        return;
+      }
       if (currentPath.includes("/")) {
         parentPath = currentPath.substring(0, currentPath.lastIndexOf("/"));
       }
