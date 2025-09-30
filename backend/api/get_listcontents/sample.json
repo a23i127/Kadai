@@ -1,0 +1,98 @@
+[
+  {
+    "name": ".github",
+    "path": ".github",
+    "sha": "2dfb108041f3beade3d4aa6d1219e92950bbdc34",
+    "size": 0,
+    "url": "https://api.github.com/repos/google/truth/contents/.github?ref=master",
+    "html_url": "https://github.com/google/truth/tree/master/.github",
+    "git_url": "https://api.github.com/repos/google/truth/git/trees/2dfb108041f3beade3d4aa6d1219e92950bbdc34",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/google/truth/contents/.github?ref=master",
+      "git": "https://api.github.com/repos/google/truth/git/trees/2dfb108041f3beade3d4aa6d1219e92950bbdc34",
+      "html": "https://github.com/google/truth/tree/master/.github"
+    }
+  },
+  {
+    "name": ".gitignore",
+    "path": ".gitignore",
+    "sha": "f0486befb6e09c52a0ab6e843339c060d74a77fb",
+    "size": 70,
+    "url": "https://api.github.com/repos/google/truth/contents/.gitignore?ref=master",
+    "html_url": "https://github.com/google/truth/blob/master/.gitignore",
+    "git_url": "https://api.github.com/repos/google/truth/git/blobs/f0486befb6e09c52a0ab6e843339c060d74a77fb",
+    "download_url": "https://raw.githubusercontent.com/google/truth/master/.gitignore",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/google/truth/contents/.gitignore?ref=master",
+      "git": "https://api.github.com/repos/google/truth/git/blobs/f0486befb6e09c52a0ab6e843339c060d74a77fb",
+      "html": "https://github.com/google/truth/blob/master/.gitignore"
+    }
+  },
+  {
+    "name": "CONTRIBUTING.md",
+    "path": "CONTRIBUTING.md",
+    "sha": "51bafc62884f54d7cf50c73aa1a1ad7454bfa970",
+    "size": 2305,
+    "url": "https://api.github.com/repos/google/truth/contents/CONTRIBUTING.md?ref=master",
+    "html_url": "https://github.com/google/truth/blob/master/CONTRIBUTING.md",
+    "git_url": "https://api.github.com/repos/google/truth/git/blobs/51bafc62884f54d7cf50c73aa1a1ad7454bfa970",
+    "download_url": "https://raw.githubusercontent.com/google/truth/master/CONTRIBUTING.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/google/truth/contents/CONTRIBUTING.md?ref=master",
+      "git": "https://api.github.com/repos/google/truth/git/blobs/51bafc62884f54d7cf50c73aa1a1ad7454bfa970",
+      "html": "https://github.com/google/truth/blob/master/CONTRIBUTING.md"
+    }
+  },
+  {
+    "name": "LICENSE",
+    "path": "LICENSE",
+    "sha": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+    "size": 11358,
+    "url": "https://api.github.com/repos/google/truth/contents/LICENSE?ref=master",
+    "html_url": "https://github.com/google/truth/blob/master/LICENSE",
+    "git_url": "https://api.github.com/repos/google/truth/git/blobs/d645695673349e3947e8e5ae42332d0ac3164cd7",
+    "download_url": "https://raw.githubusercontent.com/google/truth/master/LICENSE",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/google/truth/contents/LICENSE?ref=master",
+      "git": "https://api.github.com/repos/google/truth/git/blobs/d645695673349e3947e8e5ae42332d0ac3164cd7",
+      "html": "https://github.com/google/truth/blob/master/LICENSE"
+    }
+  },
+  {
+    "name": "README.md",
+    "path": "README.md",
+    "sha": "e924bb27f57dc8d782887ff34b746d57b9acf655",
+    "size": 1558,
+    "url": "https://api.github.com/repos/google/truth/contents/README.md?ref=master",
+    "html_url": "https://github.com/google/truth/blob/master/README.md",
+    "git_url": "https://api.github.com/repos/google/truth/git/blobs/e924bb27f57dc8d782887ff34b746d57b9acf655",
+    "download_url": "https://raw.githubusercontent.com/google/truth/master/README.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/google/truth/contents/README.md?ref=master",
+      "git": "https://api.github.com/repos/google/truth/git/blobs/e924bb27f57dc8d782887ff34b746d57b9acf655",
+      "html": "https://github.com/google/truth/blob/master/README.md"
+    }
+  },
+  {
+    "name": "core",
+    "path": "core",
+    "sha": "937ab3ead5938f081d2db9a5cb92cc95202bc6d9",
+    "size": 0,
+    "url": "https://api.github.com/repos/google/truth/contents/core?ref=master",
+    "html_url": "https://github.com/google/truth/tree/master/core",
+    "git_url": "https://api.github.com/repos/google/truth/git/trees/937ab3ead5938f081d2db9a5cb92cc95202bc6d9",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/google/truth/contents/core?ref=master",
+      "git": "https://api.github.com/repos/google/truth/git/trees/937ab3ead5938f081d2db9a5cb92cc95202bc6d9",
+      "html": "https://github.com/google/truth/tree/master/core"
+    }
+  }
+]

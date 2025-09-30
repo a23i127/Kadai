@@ -1,0 +1,34 @@
+[
+    {
+        "name": "pom.xml",
+        "path": "core/pom.xml",
+        "sha": "32fe3ef887f390d7dea24c62ec6cc7484848b23a",
+        "size": 10147,
+        "url": "https://api.github.com/repos/google/truth/contents/core/pom.xml?ref=master",
+        "html_url": "https://github.com/google/truth/blob/master/core/pom.xml",
+        "git_url": "https://api.github.com/repos/google/truth/git/blobs/32fe3ef887f390d7dea24c62ec6cc7484848b23a",
+        "download_url": "https://raw.githubusercontent.com/google/truth/master/core/pom.xml",
+        "type": "file",
+        "_links": {
+            "self": "https://api.github.com/repos/google/truth/contents/core/pom.xml?ref=master",
+            "git": "https://api.github.com/repos/google/truth/git/blobs/32fe3ef887f390d7dea24c62ec6cc7484848b23a",
+            "html": "https://github.com/google/truth/blob/master/core/pom.xml"
+        }
+    },
+    {
+        "name": "src",
+        "path": "core/src",
+        "sha": "d45a9fbc55e3b60bd01359ba5feb8d9cea5ed191",
+        "size": 0,
+        "url": "https://api.github.com/repos/google/truth/contents/core/src?ref=master",
+        "html_url": "https://github.com/google/truth/tree/master/core/src",
+        "git_url": "https://api.github.com/repos/google/truth/git/trees/d45a9fbc55e3b60bd01359ba5feb8d9cea5ed191",
+        "download_url": null,
+        "type": "dir",
+        "_links": {
+            "self": "https://api.github.com/repos/google/truth/contents/core/src?ref=master",
+            "git": "https://api.github.com/repos/google/truth/git/trees/d45a9fbc55e3b60bd01359ba5feb8d9cea5ed191",
+            "html": "https://github.com/google/truth/tree/master/core/src"
+        }
+    }
+]
