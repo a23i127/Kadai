@@ -29,8 +29,8 @@ func main() {
 	{ //dbに対してパフォーマンスとにかく意識！！！！！！
 		api.GET("/orgs/repos", get_organization_google.ListGoogleRepos)
 		api.GET("/repos/:owner/:repo/contents/*path", get_file_or_dir_detail.GetFileOrDirContents)
-		api.POST("/repository/create/batch", db_post.PostRepositoryBatch)                //リポジトリ取得
-		api.POST("/file-or-dir/create/batch/:repo_id", file_dir_post.PostFileOrDirBatch) //ファイル・ディレクトリ取得
+		api.POST("/repository/create/batch", db_post.PostRepositoryBatch)                //リポジトリ保存
+		api.POST("/file-or-dir/create/batch/:repo_id", file_dir_post.PostFileOrDirBatch) //ファイル・ディレクトリ保存
 		api.DELETE("/db/delete-all", db_delete.DeleteAllDataHandler)
 	}
 	r.Run(":3030")

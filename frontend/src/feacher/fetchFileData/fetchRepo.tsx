@@ -29,7 +29,7 @@ export type Repo = {
     type: string;
     avatar_url: string;
   };
-};
+};  
 
 export async function fetchReposWithState(setRepos: (repos: Repo[]) => void, setLoading: (loading: boolean) => void, setError: (err: string) => void) {
   setLoading(true);
