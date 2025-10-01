@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Display.css";
-import { fetchReposWithState } from "../feacher/fetchFileData.tsx/fetchRepo";
-import { fetchFileOrDirContentsAction } from "../feacher/fetchFileData.tsx/fetchFileOrDirContents";
-import type { Repo } from "../feacher/fetchFileData.tsx/fetchRepo";
+import { fetchReposWithState } from "../feacher/fetchFileData/fetchRepo";
+import { fetchFileOrDirContentsAction } from "../feacher/fetchFileData/fetchFileOrDirContents";
+import type { Repo } from "../feacher/fetchFileData/fetchRepo";
 
 // ファイル/ディレクトリ型を拡張
 interface FileOrDir {
@@ -31,6 +31,7 @@ const DisplayArea = () => {
       setActiveRepo(repo);
       setCurrentPath("");
       const items = await fetchFileOrDirContentsAction(repo, "");
+      
       setSelectedItems(items);
     } catch {
       setError("ファイル/ディレクトリ取得に失敗しました");
@@ -41,12 +42,12 @@ const DisplayArea = () => {
 
   // ディレクトリ・ファイルクリック時
   const handleItemClick = async (item: FileOrDir) => {
-    console.log("Item clicked:", item);
     if (!activeRepo) return;
     if (item.type === "dir" && item.path) {
       setLoading(true);
       setError("");
       try {
+        console.log("ディレクトリクリック:", item.path);
         const items = await fetchFileOrDirContentsAction(activeRepo, item.path);
         setSelectedItems(items);
         setCurrentPath(item.path);
