@@ -4,6 +4,8 @@ import (
 	db_delete "smsIntern/sms-kadai/backend/api/db_delete"
 	file_dir_post "smsIntern/sms-kadai/backend/api/db_post/file_or_dhirectory"
 	db_post "smsIntern/sms-kadai/backend/api/db_post/repository"
+	"smsIntern/sms-kadai/backend/api/get_db_cash"
+	getdbrepository "smsIntern/sms-kadai/backend/api/get_db_repository"
 	"smsIntern/sms-kadai/backend/api/get_file_or_dir_detail"
 	"smsIntern/sms-kadai/backend/api/get_organization_google"
 	"smsIntern/sms-kadai/backend/db"
@@ -13,7 +15,7 @@ import (
 )
 
 func main() {
-	dbPath := "kadaitest.db"
+	dbPath := "kadai2.db"
 	if err := db.InitDB(dbPath); err != nil {
 		panic(err)
 	}
@@ -26,12 +28,15 @@ func main() {
 		AllowCredentials: true,
 	}))
 	api := r.Group("/api")
-	{ //dbに対してパフォーマンスとにかく意識！！！！！！
+	{
 		api.GET("/orgs/repos", get_organization_google.ListGoogleRepos)
 		api.GET("/repos/:owner/:repo/contents/*path", get_file_or_dir_detail.GetFileOrDirContents)
 		api.POST("/repository/create/batch", db_post.PostRepositoryBatch)                //リポジトリ保存
 		api.POST("/file-or-dir/create/batch/:repo_id", file_dir_post.PostFileOrDirBatch) //ファイル・ディレクトリ保存
 		api.DELETE("/db/delete-all", db_delete.DeleteAllDataHandler)
+		// キャッシュ取得API: /api/db/fileordir/:repoId/*path
+		api.GET("/db/fileordir/:repoId/*path", get_db_cash.HandleGetFileOrDirCache)
+		api.GET("/db/repos", getdbrepository.HandleGetRepositoriesCache)
 	}
 	r.Run(":3030")
 }

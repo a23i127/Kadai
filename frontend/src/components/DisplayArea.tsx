@@ -1,9 +1,9 @@
 import { useState } from "react";
 import "./Display.css";
-import { fetchReposWithState } from "../feacher/fetchFileData/fetchRepo";
 import { fetchFileOrDirContentsAction } from "../feacher/fetchFileData/fetchFileOrDirContents";
 import { postFileOrDirBatch } from "../feacher/dbPostHandlers/fileOrDir/fileOrDirPostHandle";
 import { postRepositoriesBatch } from "../feacher/dbPostHandlers/repository/repositoryHandle";
+import { fetchReposWithCache, fetchFileOrDirWithCache } from "../feacher/getCash/getCash";
 import type { Repo } from "../feacher/fetchFileData/fetchRepo";
 import type { FileOrDir as FileOrDirApi } from "../feacher/dbPostHandlers/fileOrDir/fileOrDirFactory";
 import PopUp from "./popup/popUp";
@@ -15,7 +15,10 @@ interface FileOrDir {
   type?: "file" | "dir";
   path?: string;
   content?: string;
+  fromCache?: boolean;
 }
+
+// DBキャッシュ優先でファイル/ディレクトリ取得
 
 const DisplayArea = () => {
   const [repos, setRepos] = useState<Repo[]>([]);
@@ -28,23 +31,30 @@ const DisplayArea = () => {
   const [showPopUp, setShowPopUp] = useState(false);
   const [popUpFile, setPopUpFile] = useState<FileOrDir | undefined>(undefined);
   const [saveMessage, setSaveMessage] = useState("");
- 
+  const [cacheAlert, setCacheAlert] = useState("");
 
   const handleClickItem = async (target: Repo | FileOrDir | null) => {
     setLoading(true);
     setError("");
+    setCacheAlert("");
     try {
       if (target === null) {
-        // リポジトリ一覧取得
-        fetchReposWithState(setRepos, setLoading, setError);
-        setSelectedItems([]);
-        setCurrentPath("");
-        setActiveRepo(null);
-        // すべてのリポジトリ情報をDB保存APIに送信
-        console.log("Fetched repos:", repos);
-        if (repos.length > 0) {
-          await postRepositoriesBatch(repos);
-        }
+        // リポジトリ一覧取得（キャッシュ優先）
+        await fetchReposWithCache(//ok
+          (newRepos: Repo[]) => {
+            setRepos(newRepos);
+            setSelectedItems([]);
+            setCurrentPath("");
+            setActiveRepo(null);
+            // すべてのリポジトリ情報をDB保存APIに送信
+            console.log("Fetched repos:", newRepos);
+            if (newRepos.length > 0) {
+              postRepositoriesBatch(newRepos);
+            }
+          },
+          setLoading,
+          setError
+        );
         return;
       }
       // クリック対象が Repo の場合
@@ -52,7 +62,12 @@ const DisplayArea = () => {
         const repo = target as Repo;
         setActiveRepo(repo);
         setCurrentPath("");
-        const items = await fetchFileOrDirContentsAction(repo, "");
+        // DBキャッシュ優先で取得
+        const items = await fetchFileOrDirWithCache(//ok
+          repo.id,
+          "",
+          () => fetchFileOrDirContentsAction(repo, "") //ok
+        );
         setSelectedItems(items);
         // キャッシュに追加
         if (repo.id) {
@@ -61,7 +76,10 @@ const DisplayArea = () => {
             [repo.id]: [...(prev[repo.id] ?? []), ...items]
           }));
         }
-  
+        // キャッシュから取得した場合はアラート表示
+        if (items.length > 0 && items[0].fromCache) {
+          setCacheAlert("キャッシュから取得しました");
+        }
         return;
       }
       // クリック対象が FileOrDir の場合
@@ -69,7 +87,12 @@ const DisplayArea = () => {
       if (!activeRepo) return;
       // 📂 ディレクトリ
       if (item.type === "dir" && item.path) {
-        const items = await fetchFileOrDirContentsAction(activeRepo, item.path);
+        // DBキャッシュ優先で取得
+        const items = await fetchFileOrDirWithCache(
+          activeRepo.id,
+          item.path,
+          () => fetchFileOrDirContentsAction(activeRepo, item.path)
+        );
         setSelectedItems(items);
         setCurrentPath(item.path);
         if (activeRepo.id) {
@@ -78,33 +101,36 @@ const DisplayArea = () => {
             [activeRepo.id]: [...(prev[activeRepo.id] ?? []), ...items]
           }));
         }
+        if (items.length > 0 && items[0].fromCache) {
+          setCacheAlert("キャッシュから取得しました");
+        }
         return;
       }
       // 📄 ファイル
       if (item.type === "file" && item.url && item.path) {
-        const owner = activeRepo.owner.login;
-        const repoName = activeRepo.name;
-        const ref = activeRepo.default_branch;
-        const url = `https://api.github.com/repos/${owner}/${repoName}/contents/${encodeURIComponent(item.path)}?ref=${ref}`;
-        const res = await fetch(url, { headers: { Accept: "application/vnd.github+json" }});
-        const data = await res.json();
-        let content = "";
-        if (data?.type === "file" && data.encoding === "base64" && typeof data.content === "string") {
-          content = atob(data.content);
-        } else {
-          content = "ファイル内容の取得に失敗しました";
+        // DBキャッシュ優先で取得
+        const items = await fetchFileOrDirWithCache(
+          activeRepo.id,
+          item.path,
+          () => fetchFileOrDirContentsAction(activeRepo, item.path) 
+        );
+        if (items.length > 0) {
+          const fileWithContent = items[0];
+          if (activeRepo.id) {
+            setAllFetchedItemsDict(prev => ({
+              ...prev,
+              [activeRepo.id]: [...(prev[activeRepo.id] ?? []), fileWithContent]
+            }));
+          }
+          setPopUpFile(fileWithContent);
+          setShowPopUp(true);
+          if (fileWithContent.fromCache) {
+            setCacheAlert("キャッシュから取得しました");
+          }
+          return;
         }
-        const fileWithContent: FileOrDir = { ...item, content };
-        // キャッシュに追加（ディレクトリから潜ったファイルも必ず追加）
-        if (activeRepo.id) {
-          setAllFetchedItemsDict(prev => ({
-            ...prev,
-            [activeRepo.id]: [...(prev[activeRepo.id] ?? []), fileWithContent]
-          }));
-        }
-        // ポップアップ表示
-        setPopUpFile(fileWithContent);
-        setShowPopUp(true);
+        // キャッシュがなければAPIで取得（fetchFileOrDirWithCacheのfallbackで取得済み）
+        setError("ファイルが見つかりません");
         return;
       }
     } catch {
@@ -185,6 +211,9 @@ const DisplayArea = () => {
       {error && <div className="error">{error}</div>}
       {saveMessage && (
         <div style={{ color: '#4caf50', fontWeight: 'bold', marginBottom: 16, fontSize: '1.1em' }}>{saveMessage}</div>
+      )}
+      {cacheAlert && (
+        <div style={{ background: '#ffe082', color: '#333', fontWeight: 'bold', marginBottom: 16, fontSize: '1.1em', borderRadius: 8, padding: '8px 16px', boxShadow: '0 2px 8px rgba(255,193,7,0.15)' }}>{cacheAlert}</div>
       )}
       <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
         <div style={{ width: 600, background: '#fff', borderRadius: 16, boxShadow: '0 2px 16px rgba(0,0,0,0.08)', padding: 32, marginTop: 16 }}>
