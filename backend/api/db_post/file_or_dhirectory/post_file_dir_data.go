@@ -11,6 +11,9 @@ import (
 )
 
 // FileOrDirのバルクUPSERT APIハンドラ
+// バルクインサートで投げるクエリ減らしてパフォーマンス上げる
+// sqlを投げる回数減らしてパフォーマンス上げるために50件ずつバルク
+// postの数＝クエリの数ではない
 func PostFileOrDirBatch(c *gin.Context) {
 	repoIDStr := c.Param("repo_id")
 	if repoIDStr == "" {

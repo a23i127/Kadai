@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import "./Display.css";
 import { fetchReposWithState } from "../feacher/fetchFileData/fetchRepo";
 import { fetchFileOrDirContentsAction } from "../feacher/fetchFileData/fetchFileOrDirContents";
+import { postFileOrDirBatch } from "../feacher/dbPostHandlers/fileOrDir/fileOrDirPostHandle";
+import { postRepositoriesBatch } from "../feacher/dbPostHandlers/repository/repositoryHandle";
 import type { Repo } from "../feacher/fetchFileData/fetchRepo";
+import type { FileOrDir as FileOrDirApi } from "../feacher/dbPostHandlers/fileOrDir/fileOrDirFactory";
 
 // ファイル/ディレクトリ型を拡張
 interface FileOrDir {
@@ -31,8 +34,14 @@ const DisplayArea = () => {
       setActiveRepo(repo);
       setCurrentPath("");
       const items = await fetchFileOrDirContentsAction(repo, "");
-      
       setSelectedItems(items);
+      console.log( selectedItems);
+      // リポジトリ情報をDB保存APIに送信
+      await postRepositoriesBatch([repo]);
+      // DB保存API呼び出し
+      if (repo.id && items.length > 0) {
+        await postFileOrDirBatch(repo.id, items as FileOrDirApi[]);
+      }
     } catch {
       setError("ファイル/ディレクトリ取得に失敗しました");
       setSelectedItems([]);
