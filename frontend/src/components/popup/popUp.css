@@ -1,0 +1,75 @@
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popup-modal {
+  background: #222;
+  color: #39ff14;
+  padding: 32px;
+  border-radius: 12px;
+  min-width: 400px;
+  max-width: 800px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+.popup-close-btn {
+  position: fixed; /* absolute→fixedで画面上に固定 */
+  top: 32px; /* さらに下にずらす */
+  right: 32px; /* さらに右に余白を増やす */
+  background: #eee;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 20px; /* ボタン自体もさらに大きく */
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.6em; /* さらに大きく */
+  z-index: 1001; /* ポップアップより上に */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.popup-close-btn:focus {
+  outline: 2px solid #39ff14;
+}
+
+.popup-title {
+  color: #39ff14;
+  margin-bottom: 16px;
+}
+
+.popup-filename,
+.popup-path {
+  margin-bottom: 8px;
+}
+
+.popup-content-zone {
+  margin-top: 24px;
+  text-align: left;
+  background: #222;
+  color: #39ff14;
+  padding: 16px;
+  border-radius: 8px;
+  max-width: 700px;
+  margin: 24px auto;
+  overflow-x: auto;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.popup-content-text {
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: #39ff14;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  font-size: 1em;
+}
