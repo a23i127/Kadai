@@ -4,6 +4,7 @@ import { fetchFileOrDirContentsAction } from "../feacher/fetchFileData/fetchFile
 import { postFileOrDirBatch } from "../feacher/dbPostHandlers/fileOrDir/fileOrDirPostHandle";
 import { postRepositoriesBatch } from "../feacher/dbPostHandlers/repository/repositoryHandle";
 import { fetchReposWithCache, fetchFileOrDirWithCache } from "../feacher/getCash/getCash";
+import { searchRepositories } from "../feacher/searchRepository/fuc";
 import type { Repo } from "../feacher/fetchFileData/fetchRepo";
 import type { FileOrDir as FileOrDirApi } from "../feacher/dbPostHandlers/fileOrDir/fileOrDirFactory";
 import PopUp from "./popup/popUp";
@@ -32,6 +33,24 @@ const DisplayArea = () => {
   const [popUpFile, setPopUpFile] = useState<FileOrDir | undefined>(undefined);
   const [saveMessage, setSaveMessage] = useState("");
   const [cacheAlert, setCacheAlert] = useState("");
+
+  // 検索API呼び出し関数
+  
+
+  // 検索ボタンのクリックハンドラ
+  const handleSearchClick = () => {
+    const repoName = window.prompt("検索したいリポジトリ名を入力してください（空欄で全件取得）", "");
+    searchRepositories(
+      repoName,
+      setRepos,
+      setSelectedItems,
+      setCurrentPath,
+      setActiveRepo,
+      setLoading,
+      setError,
+      setCacheAlert
+    );
+  };
 
   const handleClickItem = async (target: Repo | FileOrDir | null) => {
     setLoading(true);
@@ -200,44 +219,50 @@ const DisplayArea = () => {
 
   return (
     <div className="display-area" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #e0e7ff 0%, #fff 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', paddingTop: 48 }}>
-      <button className="organization-btn" onClick={() => handleClickItem(null)} style={{ marginBottom: 24 }}>
+      <div style={{ width: 600, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <h1 style={{ color: '#222', fontWeight: 'bold', fontSize: '2.2em', letterSpacing: '0.04em', margin: 0 }}>Repository Explorer</h1>
+        <button className="organization-btn" style={{ background: '#fff', color: '#6366f1', border: '1.5px solid #6366f1', borderRadius: 10, fontWeight: 'bold', fontSize: '1.1em', padding: '10px 32px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(99,102,241,0.10)', marginLeft: 16, transition: 'background 0.2s, color 0.2s' }} onClick={handleSearchClick}>
+          🔍 検索
+        </button>
+      </div>
+      <button className="organization-btn" onClick={() => handleClickItem(null)} style={{ marginBottom: 24, background: 'linear-gradient(90deg, #6366f1 0%, #60a5fa 100%)', color: '#fff', fontWeight: 'bold', fontSize: '1.15em', borderRadius: 10, padding: '12px 32px', boxShadow: '0 2px 8px rgba(99,102,241,0.10)', border: 'none', letterSpacing: '0.04em', transition: 'background 0.2s' }}>
         リポジトリ取得
       </button>
       {Object.keys(allFetchedItemsDict).length > 0 && (
-        <button className="organization-btn" onClick={handleSaveAllFetchedItems} style={{ marginBottom: 24, background: '#4caf50', color: '#fff', boxShadow: '0 2px 8px rgba(76,175,80,0.2)', fontWeight: 'bold', fontSize: '1.1em', letterSpacing: '0.05em' }}>
+        <button className="organization-btn" onClick={handleSaveAllFetchedItems} style={{ marginBottom: 24, background: '#4caf50', color: '#fff', boxShadow: '0 2px 8px rgba(76,175,80,0.2)', fontWeight: 'bold', fontSize: '1.1em', letterSpacing: '0.05em', borderRadius: 10, padding: '10px 32px', border: 'none' }}>
           すべて保存
         </button>
       )}
-      {loading && <div className="loading">読み込み中...</div>}
-      {error && <div className="error">{error}</div>}
+      {loading && <div className="loading" style={{ marginBottom: 16 }}>読み込み中...</div>}
+      {error && <div className="error" style={{ marginBottom: 16 }}>{error}</div>}
       {saveMessage && (
-        <div style={{ color: '#4caf50', fontWeight: 'bold', marginBottom: 16, fontSize: '1.1em' }}>{saveMessage}</div>
+        <div style={{ color: '#4caf50', fontWeight: 'bold', marginBottom: 16, fontSize: '1.1em', borderRadius: 8, background: '#e8f5e9', padding: '8px 16px', boxShadow: '0 2px 8px rgba(76,175,80,0.10)' }}>{saveMessage}</div>
       )}
       {cacheAlert && (
         <div style={{ background: '#ffe082', color: '#333', fontWeight: 'bold', marginBottom: 16, fontSize: '1.1em', borderRadius: 8, padding: '8px 16px', boxShadow: '0 2px 8px rgba(255,193,7,0.15)' }}>{cacheAlert}</div>
       )}
       <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-        <div style={{ width: 600, background: '#fff', borderRadius: 16, boxShadow: '0 2px 16px rgba(0,0,0,0.08)', padding: 32, marginTop: 16 }}>
+        <div style={{ width: 650, background: '#fff', borderRadius: 20, boxShadow: '0 4px 24px rgba(99,102,241,0.10)', padding: 40, marginTop: 16, minHeight: 400 }}>
           {repos.length === 0 ? (
-            <span style={{ color: '#888', fontSize: '1.1em' }}>リポジトリ表示領域およびファイル表示領域</span>
+            <span style={{ color: '#888', fontSize: '1.15em', fontWeight: 'bold', letterSpacing: '0.03em' }}>リポジトリ表示領域およびファイル表示領域</span>
           ) : (
             <ul className="repo-list" style={{ padding: 0 }}>
               {selectedItems.length > 0 && (
-                <button className="organization-btn" style={{ marginBottom: 16, background: "#eee", color: "#333", fontWeight: 'bold', fontSize: '1em' }} onClick={handleBackClick}>
-                  一つ前に戻る
+                <button className="organization-btn" style={{ marginBottom: 16, background: "#eee", color: "#333", fontWeight: 'bold', fontSize: '1em', borderRadius: 8, padding: '8px 24px', border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }} onClick={handleBackClick}>
+                  ← 一つ前に戻る
                 </button>
               )}
               {selectedItems.length > 0
                 ? selectedItems.map((item, idx) => (
-                    <li key={idx} className="repo-list-item" style={{ marginBottom: 8 }}>
-                      <button className="repo-link" style={{ background: "#222", color: "#39ff14", border: "none", padding: '8px 16px', borderRadius: 6, cursor: "pointer", fontWeight: 'bold', fontSize: '1em', width: '100%', textAlign: 'left', transition: 'background 0.2s' }} onClick={() => handleClickItem(item)}>
+                    <li key={idx} className="repo-list-item" style={{ marginBottom: 10, borderRadius: 8, background: '#f3f4f6', boxShadow: '0 1px 4px rgba(99,102,241,0.04)', padding: '8px 0' }}>
+                      <button className="repo-link" style={{ background: "#222", color: "#39ff14", border: "none", padding: '10px 20px', borderRadius: 8, cursor: "pointer", fontWeight: 'bold', fontSize: '1.08em', width: '100%', textAlign: 'left', transition: 'background 0.2s', letterSpacing: '0.02em' }} onClick={() => handleClickItem(item)}>
                         {item.name}
                       </button>
                     </li>
                   ))
                 : repos.map(repo => (
-                    <li key={repo.id} className="repo-list-item" style={{ marginBottom: 8 }}>
-                      <button className="repo-link" style={{ background: "linear-gradient(90deg, #6366f1 0%, #60a5fa 100%)", color: "#fff", border: "none", padding: '12px 24px', borderRadius: 8, cursor: "pointer", fontWeight: 'bold', fontSize: '1.1em', width: '100%', textAlign: 'left', boxShadow: '0 2px 8px rgba(99,102,241,0.08)', transition: 'background 0.2s' }} onClick={() => handleClickItem(repo)}>
+                    <li key={repo.id} className="repo-list-item" style={{ marginBottom: 10, borderRadius: 8, background: '#f3f4f6', boxShadow: '0 1px 4px rgba(99,102,241,0.04)', padding: '8px 0' }}>
+                      <button className="repo-link" style={{ background: "linear-gradient(90deg, #6366f1 0%, #60a5fa 100%)", color: "#fff", border: "none", padding: '14px 28px', borderRadius: 10, cursor: "pointer", fontWeight: 'bold', fontSize: '1.13em', width: '100%', textAlign: 'left', boxShadow: '0 2px 8px rgba(99,102,241,0.10)', transition: 'background 0.2s', letterSpacing: '0.03em' }} onClick={() => handleClickItem(repo)}>
                         {repo.name}
                       </button>
                     </li>
