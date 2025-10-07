@@ -2,11 +2,19 @@ package model
 
 import "time"
 
+type Owner struct {
+	Login     string `json:"login"`
+	HTMLURL   string `json:"html_url"`
+	Type      string `json:"type"`
+	AvatarURL string `json:"avatar_url"`
+}
+
 type Repository struct {
 	ID            uint   `gorm:"primaryKey" json:"id"`
 	Name          string `gorm:"index;not null" json:"name"`
 	FullName      string `gorm:"uniqueIndex;not null" json:"full_name"`
 	DefaultBranch string `json:"default_branch"`
+	Owner         Owner  `gorm:"embedded;embeddedPrefix:owner_" json:"owner"`
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 }

@@ -22,8 +22,16 @@ func PostRepositoryBatch(c *gin.Context) {
 		return
 	}
 	if err := db.DB.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "full_name"}},
-		DoUpdates: clause.AssignmentColumns([]string{"name", "default_branch", "updated_at"}),
+		Columns: []clause.Column{{Name: "full_name"}},
+		DoUpdates: clause.AssignmentColumns([]string{
+			"name",
+			"default_branch",
+			"owner_login",
+			"owner_html_url",
+			"owner_type",
+			"owner_avatar_url",
+			"updated_at",
+		}),
 	}).CreateInBatches(items, 50).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
