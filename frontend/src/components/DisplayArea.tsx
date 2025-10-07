@@ -47,7 +47,8 @@ const DisplayArea = () => {
             setCurrentPath("");
             setActiveRepo(null);
             // すべてのリポジトリ情報をDB保存APIに送信
-            console.log("Fetched repos:", newRepos);
+            console.log("Repos fetched:", newRepos);
+            
             if (newRepos.length > 0) {
               postRepositoriesBatch(newRepos);
             }
