@@ -11,6 +11,10 @@ export const searchRepositories = async (
   setError: (err: string) => void,
   setCacheAlert: (msg: string) => void
 ) => {
+  if (repoName === null) {
+    // キャンセル時は何もしない
+    return;
+  }
   try {
     setLoading(true);
     setError("");
