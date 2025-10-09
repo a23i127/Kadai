@@ -5,6 +5,7 @@ import { postFileOrDirBatch } from "../feacher/dbPostHandlers/fileOrDir/fileOrDi
 import { postRepositoriesBatch } from "../feacher/dbPostHandlers/repository/repositoryHandle";
 import { fetchReposWithCache, fetchFileOrDirWithCache } from "../feacher/getCash/getCash";
 import { searchRepositories } from "../feacher/searchRepository/fuc";
+import { showRepoNameCandidates } from "../feacher/searchRepository/showRepoNameCandidate";
 import type { Repo } from "../feacher/fetchFileData/fetchRepo";
 import type { FileOrDir as FileOrDirApi } from "../feacher/dbPostHandlers/fileOrDir/fileOrDirFactory";
 import PopUp from "./popup/popUp";
@@ -34,12 +35,11 @@ const DisplayArea = () => {
   const [saveMessage, setSaveMessage] = useState("");
   const [cacheAlert, setCacheAlert] = useState("");
 
-  // 検索API呼び出し関数
-  
 
   // 検索ボタンのクリックハンドラ
-  const handleSearchClick = () => {
-    const repoName = window.prompt("検索したいリポジトリ名を入力してください（空欄で全件取得）", "");
+  const handleSearchClick = async () => {
+    // dbからリポジトリ取得して、あれば、その名前を検索候補として表示
+    const repoName = await showRepoNameCandidates();
     searchRepositories(
       repoName,
       setRepos,
