@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	dbPath := "kadai2.db"
+	dbPath := "kadai5.db"
 	if err := db.InitDB(dbPath); err != nil {
 		panic(err)
 	}
