@@ -1,0 +1,62 @@
+[
+  {
+    "name": "e-commerce-frontend",
+    "full_name": "shopcompany/e-commerce-frontend",
+    "default_branch": "main",
+    "tag": "production",
+    "owner": {
+      "login": "shopcompany",
+      "html_url": "https://github.com/shopcompany",
+      "type": "Organization",
+      "avatar_url": "https://avatars.githubusercontent.com/u/555666"
+    }
+  },
+  {
+    "name": "microservice-auth",
+    "full_name": "devteam/microservice-auth",
+    "default_branch": "develop",
+    "tag": "microservice",
+    "owner": {
+      "login": "devteam",
+      "html_url": "https://github.com/devteam",
+      "type": "Organization",
+      "avatar_url": "https://avatars.githubusercontent.com/u/777888"
+    }
+  },
+  {
+    "name": "data-analytics",
+    "full_name": "analytics-corp/data-analytics",
+    "default_branch": "master",
+    "tag": "analytics",
+    "owner": {
+      "login": "analytics-corp",
+      "html_url": "https://github.com/analytics-corp",
+      "type": "Organization",
+      "avatar_url": "https://avatars.githubusercontent.com/u/999000"
+    }
+  },
+  {
+    "name": "mobile-app-ios",
+    "full_name": "mobiledev/mobile-app-ios",
+    "default_branch": "main",
+    "tag": "mobile",
+    "owner": {
+      "login": "mobiledev",
+      "html_url": "https://github.com/mobiledev",
+      "type": "User",
+      "avatar_url": "https://avatars.githubusercontent.com/u/111222"
+    }
+  },
+  {
+    "name": "devops-scripts",
+    "full_name": "ops-team/devops-scripts",
+    "default_branch": "main",
+    "tag": "devops",
+    "owner": {
+      "login": "ops-team",
+      "html_url": "https://github.com/ops-team",
+      "type": "Organization",
+      "avatar_url": "https://avatars.githubusercontent.com/u/333444"
+    }
+  }
+]

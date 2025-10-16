@@ -9,6 +9,7 @@ type Owner struct {
 	AvatarURL string `json:"avatar_url"`
 }
 
+// Repository テーブル
 type Repository struct {
 	ID            uint   `gorm:"primaryKey" json:"id"`
 	Name          string `gorm:"index;not null" json:"name"`

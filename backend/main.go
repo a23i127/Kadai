@@ -29,6 +29,7 @@ func main() {
 	}))
 	api := r.Group("/api")
 	{
+
 		api.GET("/orgs/repos", get_organization_google.ListGoogleRepos)
 		api.GET("/repos/:owner/:repo/contents/*path", get_file_or_dir_detail.GetFileOrDirContents)
 		api.POST("/repository/create/batch", db_post.PostRepositoryBatch)                //リポジトリ保存
