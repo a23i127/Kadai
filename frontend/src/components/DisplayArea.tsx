@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./Display.css";
 import { postFileOrDirBatch } from "../feacher/dbPostHandlers/fileOrDir/fileOrDirPostHandle";
+import { postRepositoriesBatch } from "../feacher/dbPostHandlers/repository/repositoryHandle";
 import { showRepoNameCandidates } from "../feacher/searchRepository/showRepoNameCandidate";
 import type { Repo } from "../feacher/fetchFileData/fetchRepo";
 import type { FileOrDir as FileOrDirApi } from "../feacher/dbPostHandlers/fileOrDir/fileOrDirFactory";
@@ -134,6 +135,9 @@ const DisplayArea = () => {
     setError("");
     setSaveMessage("");
     try {
+      // リポジトリデータをdb保存
+      await postRepositoriesBatch(repos);
+      
       // allFetchedItemsDictの各リポジトリIDごとに保存
       for (const repoIdStr of Object.keys(allFetchedItemsDict)) {
         const repoId = Number(repoIdStr);
@@ -194,47 +198,47 @@ const DisplayArea = () => {
   };
 
   return (
-    <div className="display-area" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #e0e7ff 0%, #fff 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', paddingTop: 48 }}>
-      <div style={{ width: 600, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, position: 'relative' }}>
-        <h1 style={{ color: '#222', fontWeight: 'bold', fontSize: '2.2em', letterSpacing: '0.04em', margin: 0 }}>Repository Explorer</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button className="organization-btn" style={{ background: '#fff', color: '#6366f1', border: '1.5px solid #6366f1', borderRadius: 10, fontWeight: 'bold', fontSize: '1.1em', padding: '10px 32px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(99,102,241,0.10)', transition: 'background 0.2s, color 0.2s' }} onClick={handleSearchClick}>
+    <div className="display-area">
+      <div className="header-container">
+        <h1 className="app-title">Repository Explorer</h1>
+        <div className="header-buttons">
+          <button className="organization-btn search" onClick={handleSearchClick}>
             🔍 検索
           </button>
-          <button className="favorite-dir-btn" style={{ background: 'linear-gradient(90deg, #60a5fa 0%, #6366f1 100%)', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 'bold', fontSize: '1.05em', padding: '10px 22px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(99,102,241,0.10)', transition: 'background 0.2s' }} onClick={handleFavoriteDirClick}>
+          <button className="organization-btn favorite" onClick={handleFavoriteDirClick}>
             お気に入りディレクトリ
           </button>
         </div>
       </div>
-      <button className="organization-btn" onClick={() => handleClickItem(null)} style={{ marginBottom: 24, background: 'linear-gradient(90deg, #6366f1 0%, #60a5fa 100%)', color: '#fff', fontWeight: 'bold', fontSize: '1.15em', borderRadius: 10, padding: '12px 32px', boxShadow: '0 2px 8px rgba(99,102,241,0.10)', border: 'none', letterSpacing: '0.04em', transition: 'background 0.2s' }}>
+      <button className="organization-btn get-repos" onClick={() => handleClickItem(null)}>
         リポジトリ取得
       </button>
       {Object.keys(allFetchedItemsDict).length > 0 && (
-        <button className="organization-btn" onClick={handleSaveAllFetchedItems} style={{ marginBottom: 24, background: '#4caf50', color: '#fff', boxShadow: '0 2px 8px rgba(76,175,80,0.2)', fontWeight: 'bold', fontSize: '1.1em', letterSpacing: '0.05em', borderRadius: 10, padding: '10px 32px', border: 'none' }}>
+        <button className="organization-btn save-all" onClick={handleSaveAllFetchedItems}>
           すべて保存
         </button>
       )}
-      {loading && <div className="loading" style={{ marginBottom: 16 }}>読み込み中...</div>}
-      {error && <div className="error" style={{ marginBottom: 16 }}>{error}</div>}
+      {loading && <div className="loading">読み込み中...</div>}
+      {error && <div className="error">{error}</div>}
       {saveMessage && (
-        <div style={{ color: '#4caf50', fontWeight: 'bold', marginBottom: 16, fontSize: '1.1em', borderRadius: 8, background: '#e8f5e9', padding: '8px 16px', boxShadow: '0 2px 8px rgba(76,175,80,0.10)' }}>{saveMessage}</div>
+        <div className="save-message">{saveMessage}</div>
       )}
       {cacheAlert && (
-        <div style={{ background: '#ffe082', color: '#333', fontWeight: 'bold', marginBottom: 16, fontSize: '1.1em', borderRadius: 8, padding: '8px 16px', boxShadow: '0 2px 8px rgba(255,193,7,0.15)' }}>{cacheAlert}</div>
+        <div className="cache-alert">{cacheAlert}</div>
       )}
-      <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-        <div style={{ width: 650, background: '#fff', borderRadius: 20, boxShadow: '0 4px 24px rgba(99,102,241,0.10)', padding: 40, marginTop: 16, minHeight: 400 }}>
+      <div className="main-content-wrapper">
+        <div className="main-content">
           {repos.length === 0 ? (
-            <span style={{ color: '#888', fontSize: '1.15em', fontWeight: 'bold', letterSpacing: '0.03em' }}>リポジトリ表示領域およびファイル表示領域</span>
+            <span className="empty-state">リポジトリ表示領域およびファイル表示領域</span>
           ) : (
-            <ul className="repo-list" style={{ padding: 0 }}>
+            <ul className="repo-list">
               {selectedItems.length > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className="navigation-area">
+                  <div className="navigation-left">
                     {/* activeRepo名＋星トグルを一体化 */}
                     {activeRepo && (
-                      <span style={{ display: 'flex', alignItems: 'center', marginRight: 16, background: '#eef2ff', borderRadius: 8, padding: '6px 16px' }}>
-                        <span style={{ color: '#6366f1', fontWeight: 'bold', fontSize: '1.08em', marginRight: 8 }}>
+                      <span className="active-repo-info">
+                        <span className="active-repo-name">
                           {activeRepo.name}
                         </span>
                         <Toggle onClick={() => {
@@ -244,33 +248,14 @@ const DisplayArea = () => {
                         }}>★</Toggle>
                       </span>
                     )}
-                    <button className="organization-btn" style={{ background: "#eee", color: "#333", fontWeight: 'bold', fontSize: '1em', borderRadius: 8, padding: '8px 24px', border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }} onClick={handleBackClick}>
+                    <button className="organization-btn back" onClick={handleBackClick}>
                       ← 一つ前に戻る
                     </button>
                   </div>
                   {/* タグ付けボタンを右端に配置 */}
                   <button 
-                    style={{
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: 8,
-                      padding: '8px 16px',
-                      fontSize: '0.9em',
-                      fontWeight: 'bold',
-                      cursor: 'pointer',
-                      boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onClick={() => handleTagAction(activeRepo, currentPath)}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-1px)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(102, 126, 234, 0.3)';
-                    }}
+                    className="tag-button"
+                    onClick={() => handleTagAction(activeRepo, currentPath, setRepos)}
                   >
                     🏷️ タグ付け
                   </button>
@@ -278,16 +263,21 @@ const DisplayArea = () => {
               )}
               {selectedItems.length > 0
                 ? selectedItems.map((item, idx) => (
-                    <li key={idx} className="repo-list-item" style={{ marginBottom: 10, borderRadius: 8, background: '#f3f4f6', boxShadow: '0 1px 4px rgba(99,102,241,0.04)', padding: '8px 0' }}>
-                      <button className="repo-link" style={{ background: "#222", color: "#39ff14", border: "none", padding: '10px 20px', borderRadius: 8, cursor: "pointer", fontWeight: 'bold', fontSize: '1.08em', width: '100%', textAlign: 'left', transition: 'background 0.2s', letterSpacing: '0.02em' }} onClick={() => handleClickItem(item)}>
+                    <li key={idx} className="repo-list-item">
+                      <button className="repo-link file-dir" onClick={() => handleClickItem(item)}>
                         {item.name}
                       </button>
                     </li>
                   ))
                 : repos.map(repo => (
-                    <li key={repo.id} className="repo-list-item" style={{ marginBottom: 10, borderRadius: 8, background: '#f3f4f6', boxShadow: '0 1px 4px rgba(99,102,241,0.04)', padding: '8px 0' }}>
-                      <button className="repo-link" style={{ background: "linear-gradient(90deg, #6366f1 0%, #60a5fa 100%)", color: "#fff", border: "none", padding: '14px 28px', borderRadius: 10, cursor: "pointer", fontWeight: 'bold', fontSize: '1.13em', width: '100%', textAlign: 'left', boxShadow: '0 2px 8px rgba(99,102,241,0.10)', transition: 'background 0.2s', letterSpacing: '0.03em' }} onClick={() => handleClickItem(repo)}>
-                        {repo.name}
+                    <li key={repo.id} className="repo-list-item">
+                      <button className="repo-link repository" onClick={() => handleClickItem(repo)}>
+                        <span>{repo.name}</span>
+                        {repo.tag && (
+                          <span className="repo-tag">
+                            🏷️ {repo.tag}
+                          </span>
+                        )}
                       </button>
                     </li>
                   ))}
