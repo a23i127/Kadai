@@ -6,12 +6,14 @@ githubAPIを使ったファイルエクスプローラーみたいなものを�
 ブランチ切り替えてなくて、mainにマージしてしまった10月16日(申し訳ないです)
 追加で変更加えたとこに対しては、developmentブランチからのpullリクエストで変更差分として説明するようにする。
 
+⭐️システムフロー全体図
+![D59F605E-72F2-40F7-9282-DC148E6AAC69_1_201_a](https://github.com/user-attachments/assets/23bd2435-2d94-4159-b253-165ebb7dc93d)  
 ⭐️主な構成
   frontend
   ・DisplayArea.tsxが、localhostにアクセスした際に表示されるようになってる
   backend
   ・main.goにルーティングをしている
-![D59F605E-72F2-40F7-9282-DC148E6AAC69_1_201_a](https://github.com/user-attachments/assets/23bd2435-2d94-4159-b253-165ebb7dc93d)  
+
 ⭐️やったこと
   基本ブランチはdevelopmentというとこを作業スペースにして、mainにマージするのは最後にやるようにした。
   フロントエンド
