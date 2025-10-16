@@ -8,6 +8,22 @@ githubAPIを使ったファイルエクスプローラーみたいなものを�
 
 ⭐️システムフロー全体図
 ![D59F605E-72F2-40F7-9282-DC148E6AAC69_1_201_a](https://github.com/user-attachments/assets/23bd2435-2d94-4159-b253-165ebb7dc93d)  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ⭐️主な構成
   frontend
   ・DisplayArea.tsxが、localhostにアクセスした際に表示されるようになってる
