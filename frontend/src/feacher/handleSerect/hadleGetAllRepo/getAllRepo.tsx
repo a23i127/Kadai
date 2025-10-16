@@ -1,5 +1,4 @@
 import { fetchReposWithCache } from "../../getCash/getCash";
-import { postRepositoriesBatch } from "../../dbPostHandlers/repository/repositoryHandle";
 import type { Repo } from "../../fetchFileData/fetchRepo";
 import type { FileOrDir } from "../../getCash/getCash";
 
@@ -19,10 +18,7 @@ export const handleFetchAllRepos = async (
       setCurrentPath("");
       setActiveRepo(null);
       console.log("Repos fetched:", newRepos);
-      // 取得できたらまとめてDB保存
-      if (newRepos.length > 0) {
-        postRepositoriesBatch(newRepos);
-      }
+     
     },
     setLoading,
     setError

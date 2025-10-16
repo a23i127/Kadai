@@ -29,6 +29,7 @@ export type Repo = {
     type: string;
     avatar_url: string;
   };
+  tag?: string; // タグ付け機能用のフィールド
 };  
 
 export async function fetchReposWithState(setRepos: (repos: Repo[]) => void, setLoading: (loading: boolean) => void, setError: (err: string) => void) {
