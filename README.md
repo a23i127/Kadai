@@ -11,14 +11,7 @@ githubAPIを使ったファイルエクスプローラーみたいなものを�
   DisplayArea.tsxが、localhostにアクセスした際に表示されるようになってる
   backend
   main.goにルーティングをしている
-
-
-
-![D59F605E-72F2-40F7-9282-DC148E6AAC69_1_201_a](https://github.com/user-attachments/assets/23bd2435-2d94-4159-b253-165ebb7dc93d)
-
-
-
-  
+![D59F605E-72F2-40F7-9282-DC148E6AAC69_1_201_a](https://github.com/user-attachments/assets/23bd2435-2d94-4159-b253-165ebb7dc93d)  
 ⭐️やったこと
   基本ブランチはdevelopmentというとこを作業スペースにして、mainにマージするのは最後にやるようにした。
   フロントエンド
