@@ -203,18 +203,22 @@ const DisplayArea = () => {
         <h1 className="app-title">Repository Explorer</h1>
         <div className="header-buttons">
           <button className="organization-btn search" onClick={handleSearchClick}>
-            🔍 検索
+            <span>🔍</span>
+            検索
           </button>
           <button className="organization-btn favorite" onClick={handleFavoriteDirClick}>
-            お気に入りディレクトリ
+            <span>⭐</span>
+            お気に入り
           </button>
         </div>
       </div>
       <button className="organization-btn get-repos" onClick={() => handleClickItem(null)}>
+        <span>📦</span>
         リポジトリ取得
       </button>
       {Object.keys(allFetchedItemsDict).length > 0 && (
         <button className="organization-btn save-all" onClick={handleSaveAllFetchedItems}>
+          <span>💾</span>
           すべて保存
         </button>
       )}
@@ -249,7 +253,8 @@ const DisplayArea = () => {
                       </span>
                     )}
                     <button className="organization-btn back" onClick={handleBackClick}>
-                      ← 一つ前に戻る
+                      <span>←</span>
+                      一つ前に戻る
                     </button>
                   </div>
                   {/* タグ付けボタンを右端に配置 */}
@@ -257,7 +262,8 @@ const DisplayArea = () => {
                     className="tag-button"
                     onClick={() => handleTagAction(activeRepo, currentPath, setRepos)}
                   >
-                    🏷️ タグ付け
+                    <span>🏷️</span>
+                    タグ付け
                   </button>
                 </div>
               )}
