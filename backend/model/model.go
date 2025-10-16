@@ -14,6 +14,7 @@ type Repository struct {
 	Name          string `gorm:"index;not null" json:"name"`
 	FullName      string `gorm:"uniqueIndex;not null" json:"full_name"`
 	DefaultBranch string `json:"default_branch"`
+	Tag           string `json:"tag"`
 	Owner         Owner  `gorm:"embedded;embeddedPrefix:owner_" json:"owner"`
 	CreatedAt     time.Time
 	UpdatedAt     time.Time

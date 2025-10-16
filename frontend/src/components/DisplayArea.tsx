@@ -13,6 +13,7 @@ import { handleDirSelect } from "../feacher/handleSerect/handleSelectDirectory/s
 import { handleFileSelect } from "../feacher/handleSerect/handleSelectFile/selectFile";
 import { goToParentDir } from "../feacher/handleSerect/handleBackAction/handleBackAction";
 import { showFavoriteReposModal } from "../feacher/favariteRepository/favariteComponent";
+import { handleTagAction } from "../feacher/handleSerect/handleTagAction/handleTagAction";
 
 // ファイル/ディレクトリ型を拡張
 interface FileOrDir {
@@ -228,22 +229,50 @@ const DisplayArea = () => {
           ) : (
             <ul className="repo-list" style={{ padding: 0 }}>
               {selectedItems.length > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
-                  {/* activeRepo名＋星トグルを一体化 */}
-                  {activeRepo && (
-                    <span style={{ display: 'flex', alignItems: 'center', marginRight: 16, background: '#eef2ff', borderRadius: 8, padding: '6px 16px' }}>
-                      <span style={{ color: '#6366f1', fontWeight: 'bold', fontSize: '1.08em', marginRight: 8 }}>
-                        {activeRepo.name}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {/* activeRepo名＋星トグルを一体化 */}
+                    {activeRepo && (
+                      <span style={{ display: 'flex', alignItems: 'center', marginRight: 16, background: '#eef2ff', borderRadius: 8, padding: '6px 16px' }}>
+                        <span style={{ color: '#6366f1', fontWeight: 'bold', fontSize: '1.08em', marginRight: 8 }}>
+                          {activeRepo.name}
+                        </span>
+                        <Toggle onClick={() => {
+                          if (activeRepo && !favoriteRepos.some(r => r.id === activeRepo.id)) {
+                            setFavoriteRepos(prev => [...prev, activeRepo]);
+                          }
+                        }}>★</Toggle>
                       </span>
-                      <Toggle onClick={() => {
-                        if (activeRepo && !favoriteRepos.some(r => r.id === activeRepo.id)) {
-                          setFavoriteRepos(prev => [...prev, activeRepo]);
-                        }
-                      }}>★</Toggle>
-                    </span>
-                  )}
-                  <button className="organization-btn" style={{ background: "#eee", color: "#333", fontWeight: 'bold', fontSize: '1em', borderRadius: 8, padding: '8px 24px', border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }} onClick={handleBackClick}>
-                    ← 一つ前に戻る
+                    )}
+                    <button className="organization-btn" style={{ background: "#eee", color: "#333", fontWeight: 'bold', fontSize: '1em', borderRadius: 8, padding: '8px 24px', border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }} onClick={handleBackClick}>
+                      ← 一つ前に戻る
+                    </button>
+                  </div>
+                  {/* タグ付けボタンを右端に配置 */}
+                  <button 
+                    style={{
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '8px 16px',
+                      fontSize: '0.9em',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onClick={() => handleTagAction(activeRepo, currentPath)}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(102, 126, 234, 0.3)';
+                    }}
+                  >
+                    🏷️ タグ付け
                   </button>
                 </div>
               )}
