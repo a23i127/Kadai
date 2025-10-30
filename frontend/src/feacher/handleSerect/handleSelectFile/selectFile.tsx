@@ -29,11 +29,14 @@ export async function handleFileSelect(
     // キャッシュ取得失敗時は items は空のまま
   }
 
-  // キャッシュにデータがない場合のみAPIから取得
-  if (items.length === 0) {
+  // キャッシュにデータがない場合、またはcontentが空の場合にAPIから取得
+  const hasValidContent = items.length > 0 && items[0]?.content && items[0].content.trim() !== "";
+  
+  if (items.length === 0 || !hasValidContent) {
     try {
       setCacheAlert("APIからファイルを取得中...");
       items = await fetchFileOrDirContentsAction(repo, filePath);
+      fromCache = false; // APIから取得した場合はキャッシュフラグをfalseに
       
       if (items.length === 0) {
         setError("ファイルが見つかりません");
