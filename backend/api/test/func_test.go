@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,6 +27,8 @@ type TestRepository struct {
 
 type TestRepositoryBatch struct {
 	Repositories []TestRepository `json:"repositories"`
+}
+
 // GET /api/test のテスト
 func TestGetAPITest(t *testing.T) {
 	router := setupRouter()

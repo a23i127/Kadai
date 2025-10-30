@@ -44,6 +44,15 @@ func ListGoogleRepos(c *gin.Context) {
 		return
 	}
 
+	// ページネーション情報をヘッダーに追加
+	c.Header("X-Current-Page", page)
+	c.Header("X-Per-Page", limit)
 	c.Header("Cache-Control", "public, max-age=60")
+
+	// GitHubのLink ヘッダーがあれば転送（次ページ情報など）
+	if linkHeader := res.Header.Get("Link"); linkHeader != "" {
+		c.Header("Link", linkHeader)
+	}
+
 	io.Copy(c.Writer, res.Body)
 }

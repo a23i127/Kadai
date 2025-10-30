@@ -16,6 +16,7 @@ type Repository struct {
 	FullName      string `gorm:"uniqueIndex;not null" json:"full_name"`
 	DefaultBranch string `json:"default_branch"`
 	Tag           string `json:"tag"`
+	FromCache     *bool  `gorm:"type:boolean" json:"fromCache"` // キャッシュフラグ（null許可）
 	Owner         Owner  `gorm:"embedded;embeddedPrefix:owner_" json:"owner"`
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
