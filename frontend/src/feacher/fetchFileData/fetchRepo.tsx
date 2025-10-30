@@ -30,6 +30,7 @@ export type Repo = {
     avatar_url: string;
   };
   tag?: string; // タグ付け機能用のフィールド
+  fromCache?: boolean; // キャッシュから取得されたかどうかを示すフィールド
 };  
 
 export async function fetchReposWithState(setRepos: (repos: Repo[]) => void, setLoading: (loading: boolean) => void, setError: (err: string) => void) {

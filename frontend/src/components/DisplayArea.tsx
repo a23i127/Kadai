@@ -8,13 +8,13 @@ import type { FileOrDir as FileOrDirApi } from "../feacher/dbPostHandlers/fileOr
 import PopUp from "./popup/popUp";
 import Toggle from "./toggle/toggle";
 import { handleRepoSelect } from "../feacher/handleSerect/handleSerectRepo/selectRepo";
-import { handleFetchAllRepos } from "../feacher/handleSerect/hadleGetAllRepo/getAllRepo";
 import { searchRepositories } from "../feacher/searchRepository/fuc";
 import { handleDirSelect } from "../feacher/handleSerect/handleSelectDirectory/selectDirectrory";
 import { handleFileSelect } from "../feacher/handleSerect/handleSelectFile/selectFile";
 import { goToParentDir } from "../feacher/handleSerect/handleBackAction/handleBackAction";
 import { showFavoriteReposModal } from "../feacher/favariteRepository/favariteComponent";
 import { handleTagAction } from "../feacher/handleSerect/handleTagAction/handleTagAction";
+import { useLoadMoreRepos } from "../feacher/hooks/useLoadMoreRepos";
 
 // ファイル/ディレクトリ型を拡張
 interface FileOrDir {
@@ -42,6 +42,18 @@ const DisplayArea = () => {
   const [cacheAlert, setCacheAlert] = useState("");
   // お気に入りトグルでのみ更新されるactiveRepo用State（配列化）
   const [favoriteRepos, setFavoriteRepos] = useState<Repo[]>([]);
+  // 手動読み込み表示モード
+  const [isLoadMoreMode, setIsLoadMoreMode] = useState(false);
+  
+  // 手動読み込みフック
+  const {
+    isLoading: loadMoreLoading,
+    fetchError: loadMoreError,
+    hasMore,
+    loadInitialRepos,
+    loadMoreRepos,
+    resetRepos
+  } = useLoadMoreRepos({ setRepos });
 
   // 検索ボタンのクリックハンドラ
   const handleSearchClick = async () => {
@@ -59,23 +71,30 @@ const DisplayArea = () => {
     );
   };
 
-  const handleClickItem = async (target: Repo | FileOrDir | null) => {
+  // Google組織リポジトリ（手動読み込み）のクリックハンドラ
+  const handleLoadMoreClick = async () => {
+    setIsLoadMoreMode(true);
+    setSelectedItems([]);
+    setCurrentPath("");
+    setActiveRepo(null);
+    resetRepos();
+    await loadInitialRepos();
+  };
+
+  // 通常モードに戻るハンドラ
+  const handleBackToNormalMode = () => {
+    setIsLoadMoreMode(false);
+    setRepos([]);
+    setSelectedItems([]);
+    setCurrentPath("");
+    setActiveRepo(null);
+  };
+
+  const handleClickItem = async (target: Repo | FileOrDir) => {
     setLoading(true);
     setError("");
     setCacheAlert("");
     try {
-      if (target === null) {
-        // リポジトリ一覧取得（キャッシュ優先）
-        await handleFetchAllRepos(
-          setRepos,
-          setSelectedItems,
-          setCurrentPath,
-          setActiveRepo,
-          setLoading,
-          setError
-        );
-        return;
-      }
       // クリック対象が Repo の場合
       if ("owner" in target) {
         const repo = target as Repo;
@@ -212,18 +231,24 @@ const DisplayArea = () => {
           </button>
         </div>
       </div>
-      <button className="organization-btn get-repos" onClick={() => handleClickItem(null)}>
-        <span>📦</span>
-        リポジトリ取得
+      <button className="organization-btn load-more" onClick={handleLoadMoreClick}>
+        <span>📄</span>
+        Google組織（手動読み込み）
       </button>
+      {isLoadMoreMode && (
+        <button className="organization-btn back-normal" onClick={handleBackToNormalMode}>
+          <span>←</span>
+          通常モードに戻る
+        </button>
+      )}
       {Object.keys(allFetchedItemsDict).length > 0 && (
         <button className="organization-btn save-all" onClick={handleSaveAllFetchedItems}>
           <span>💾</span>
           すべて保存
         </button>
       )}
-      {loading && <div className="loading">読み込み中...</div>}
-      {error && <div className="error">{error}</div>}
+      {(loading || loadMoreLoading) && <div className="loading">読み込み中...</div>}
+      {(error || loadMoreError) && <div className="error">{error || loadMoreError}</div>}
       {saveMessage && (
         <div className="save-message">{saveMessage}</div>
       )}
@@ -275,8 +300,11 @@ const DisplayArea = () => {
                       </button>
                     </li>
                   ))
-                : repos.map(repo => (
-                    <li key={repo.id} className="repo-list-item">
+                : repos.map((repo) => (
+                    <li 
+                      key={repo.id} 
+                      className="repo-list-item"
+                    >
                       <button className="repo-link repository" onClick={() => handleClickItem(repo)}>
                         <span>{repo.name}</span>
                         {repo.tag && (
@@ -287,6 +315,30 @@ const DisplayArea = () => {
                       </button>
                     </li>
                   ))}
+              
+              {/* 手動読み込みモードの場合、Load Moreボタンとステータス表示 */}
+              {isLoadMoreMode && (
+                <li className="load-more-controls">
+                  {loadMoreLoading && (
+                    <div className="loading-indicator">
+                      <span>🔄</span> 読み込み中...
+                    </div>
+                  )}
+                  {!loadMoreLoading && hasMore && (
+                    <button 
+                      className="load-more-btn" 
+                      onClick={loadMoreRepos}
+                    >
+                      <span>⬇️</span> さらに読み込む
+                    </button>
+                  )}
+                  {!hasMore && repos.length > 0 && (
+                    <div className="end-message">
+                      すべてのリポジトリを読み込みました
+                    </div>
+                  )}
+                </li>
+              )}
             </ul>
           )}
         </div>
