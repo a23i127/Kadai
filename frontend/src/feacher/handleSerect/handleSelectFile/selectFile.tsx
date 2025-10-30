@@ -17,16 +17,36 @@ export async function handleFileSelect(
   const { setAllFetchedItemsDict, setPopUpFile, setShowPopUp, setCacheAlert, setError } = deps;
 
   let items: FileOrDir[] = [];
+  let fromCache = false;
+
+  // まずキャッシュから取得を試行
   try {
-    items = await fetchFileOrDirContentsAction(repo, filePath); // API優先
-  } catch {
     items = await fetchFileOrDirWithCache(repo.id, filePath, () => Promise.resolve([]));
+    if (items.length > 0) {
+      fromCache = true;
+    }
+  } catch {
+    // キャッシュ取得失敗時は items は空のまま
   }
 
+  // キャッシュにデータがない場合のみAPIから取得
   if (items.length === 0) {
-    setError("ファイルが見つかりません");
-    return;
+    try {
+      setCacheAlert("APIからファイルを取得中...");
+      items = await fetchFileOrDirContentsAction(repo, filePath);
+      
+      if (items.length === 0) {
+        setError("ファイルが見つかりません");
+        return;
+      }
+    } catch {
+      setError("ファイルの取得に失敗しました");
+      return;
+    }
   }
+
+  // 取得元を通知
+  setCacheAlert(fromCache ? "キャッシュからファイルを取得しました" : "APIからファイルを取得しました");
 
   const fileWithContent = items[0];
 
@@ -40,7 +60,5 @@ export async function handleFileSelect(
   setPopUpFile(fileWithContent);
   setShowPopUp(true);
 
-  if ((fileWithContent as FileOrDir)?.fromCache) {
-    setCacheAlert("キャッシュから取得しました");
-  }
+  // キャッシュアラートは上記で既に設定済み
 }
