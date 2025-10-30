@@ -233,7 +233,7 @@ const DisplayArea = () => {
       </div>
       <button className="organization-btn load-more" onClick={handleLoadMoreClick}>
         <span>📄</span>
-        Google組織（手動読み込み）
+        Googleファイル読み込む
       </button>
       {isLoadMoreMode && (
         <button className="organization-btn back-normal" onClick={handleBackToNormalMode}>
