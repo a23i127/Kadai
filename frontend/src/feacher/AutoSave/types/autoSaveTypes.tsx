@@ -1,4 +1,4 @@
-import type { Repo } from "../handleSerect/handleGetRepo/fetchRepo";
+import type { Repo } from "../../handleSerect/handleGetRepo/fetchRepo";
 
 // ファイル/ディレクトリ型
 export interface FileOrDir {
