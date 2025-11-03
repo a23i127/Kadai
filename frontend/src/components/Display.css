@@ -189,17 +189,6 @@
   box-shadow: 0 2px 8px rgba(76, 175, 80, 0.10);
 }
 
-.cache-alert {
-  background: #ffe082;
-  color: #333;
-  font-weight: bold;
-  margin-bottom: 16px;
-  font-size: 1.1em;
-  border-radius: 8px;
-  padding: 8px 16px;
-  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.15);
-}
-
 /* メインコンテンツエリア */
 .main-content-wrapper {
   width: 100%;

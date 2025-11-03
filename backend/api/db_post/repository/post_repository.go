@@ -26,12 +26,12 @@ func PostRepositoryBatch(c *gin.Context) {
 		DoUpdates: clause.AssignmentColumns([]string{
 			"name",
 			"default_branch",
-			"from_cache", // fromCacheフィールドを更新対象に追加
 			"owner_login",
 			"owner_html_url",
 			"owner_type",
 			"owner_avatar_url",
 			"tag",
+			"favorite",
 			"updated_at",
 		}),
 	}).CreateInBatches(items, 50).Error; err != nil {
