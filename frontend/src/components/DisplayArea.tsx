@@ -2,7 +2,7 @@ import { useState } from "react";
 import "./Display.css";
 import { showRepoNameCandidates } from "../feacher/searchRepository/showRepoNameCandidate";
 import type { Repo } from "../feacher/handleSerect/handleGetRepo/fetchRepo";
-import type { FileOrDir } from "../feacher/types/autoSaveTypes";
+import type { FileOrDir } from "../feacher/AutoSave/types/autoSaveTypes";
 import PopUp from "./popup/popUp";
 import Toggle from "./toggle/toggle";
 import { handleRepoSelect } from "../feacher/handleSerect/handleSerectRepo/selectRepo";
@@ -12,8 +12,8 @@ import { handleFileSelect } from "../feacher/handleSerect/handleSelectFile/selec
 import { goToParentDir } from "../feacher/handleSerect/handleBackAction/handleBackAction";
 import { showFavoriteReposModal } from "../feacher/favariteRepository/favariteComponent";
 import { handleTagAction } from "../feacher/handleSerect/handleTagAction/handleTagAction";
-import { useLoadMoreRepos } from "../feacher/hooks/useLoadMoreRepos";
-import { useAutoSave } from "../feacher/hooks/useAutoSave";
+import { useLoadMoreRepos } from "../feacher/handleSerect/handleGetRepo/useLoadMoreRepos";
+import { useAutoSave } from "../feacher/AutoSave/useAutoSave";
 
 // DBキャッシュ優先でファイル/ディレクトリ取得
 

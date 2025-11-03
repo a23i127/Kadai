@@ -1,7 +1,7 @@
-import { postFileOrDirBatch } from "../dbPostHandlers/fileOrDir/fileOrDirPostHandle";
-import { postRepositoriesBatch } from "../dbPostHandlers/repository/repositoryHandle";
-import type { Repo } from "../handleSerect/handleGetRepo/fetchRepo";
-import type { FileOrDir as FileOrDirApi } from "../dbPostHandlers/fileOrDir/fileOrDirFactory";
+import { postFileOrDirBatch } from "../../dbPostHandlers/fileOrDir/fileOrDirPostHandle";
+import { postRepositoriesBatch } from "../../dbPostHandlers/repository/repositoryHandle";
+import type { Repo } from "../../handleSerect/handleGetRepo/fetchRepo";
+import type { FileOrDir as FileOrDirApi } from "../../dbPostHandlers/fileOrDir/fileOrDirFactory";
 import type { SaveData, FileOrDir } from "../types/autoSaveTypes";
 
 // データ保存クラス

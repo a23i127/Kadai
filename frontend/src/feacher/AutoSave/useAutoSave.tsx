@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
-import { DataSaveService } from "../services/dataSaveService";
-import type { SaveData, UseAutoSaveOptions } from "../types/autoSaveTypes";
+import { DataSaveService } from "./services/dataSaveService";
+import type { SaveData, UseAutoSaveOptions } from "./types/autoSaveTypes";
 
 export const useAutoSave = ({ 
   repos, 

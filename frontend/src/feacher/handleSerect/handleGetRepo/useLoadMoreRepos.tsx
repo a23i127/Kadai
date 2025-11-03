@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
-import { fetchGoogleReposWithCache } from "../handleSerect/handleGetRepo/fetchGoogleRepos";
-import type { Repo } from "../handleSerect/handleGetRepo/fetchRepo";
+import { fetchGoogleReposWithCache } from "./fetchGoogleRepos";
+import type { Repo } from "./fetchRepo";
 
 interface UseLoadMoreReposProps {
   setRepos: (repos: Repo[] | ((prev: Repo[]) => Repo[])) => void;
