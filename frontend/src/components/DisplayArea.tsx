@@ -3,7 +3,7 @@ import "./Display.css";
 import { postFileOrDirBatch } from "../feacher/dbPostHandlers/fileOrDir/fileOrDirPostHandle";
 import { postRepositoriesBatch } from "../feacher/dbPostHandlers/repository/repositoryHandle";
 import { showRepoNameCandidates } from "../feacher/searchRepository/showRepoNameCandidate";
-import type { Repo } from "../feacher/fetchFileData/fetchRepo";
+import type { Repo } from "../feacher/handleSerect/handleGetRepo/fetchRepo";
 import type { FileOrDir as FileOrDirApi } from "../feacher/dbPostHandlers/fileOrDir/fileOrDirFactory";
 import PopUp from "./popup/popUp";
 import Toggle from "./toggle/toggle";

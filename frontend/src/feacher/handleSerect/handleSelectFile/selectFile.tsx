@@ -1,6 +1,6 @@
 import { fetchFileOrDirContentsAction } from "../../fetchFileData/fetchFileOrDirContents";
 import { fetchFileOrDirWithCache } from "../../getCash/getCash";
-import type { Repo } from "../../fetchFileData/fetchRepo";
+import type { Repo } from "../handleGetRepo/fetchRepo";
 import type { FileOrDir } from "../../getCash/getCash";
 
 export async function handleFileSelect(

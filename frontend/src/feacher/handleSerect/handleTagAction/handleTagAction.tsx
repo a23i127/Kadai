@@ -1,4 +1,4 @@
-import type { Repo } from "../../fetchFileData/fetchRepo";
+import type { Repo } from "../handleGetRepo/fetchRepo";
 
 /**
  * タグ付けアクションハンドラー - reposのstateを更新
