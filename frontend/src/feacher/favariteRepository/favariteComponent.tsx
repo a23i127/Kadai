@@ -2,9 +2,12 @@ import type { Repo } from "../handleSerect/handleGetRepo/fetchRepo";
 
 //似ている処理がsearch/Repository/showRepoNameCandidate.tsxにもあるが、dbに対してapiを叩く部分が違うため、別ファイルにしている
 
-// Repo[]を受け取り、モーダルUIでリスト表示する関数
-export const showFavoriteReposModal = async (repos: Repo[]): Promise<Repo | null> => {
-  if (!repos || repos.length === 0) {
+// Repo[]を受け取り、その中からfavorite: trueのものを抽出してモーダルUIでリスト表示する関数
+export const showFavoriteReposModal = async (allRepos: Repo[]): Promise<Repo | null> => {
+  // favorite: trueのリポジトリのみを抽出
+  const favoriteRepos = allRepos.filter(repo => repo.favorite === true);
+  
+  if (!favoriteRepos || favoriteRepos.length === 0) {
     alert("お気に入りリポジトリはありません");
     return null;
   }
@@ -32,7 +35,7 @@ export const showFavoriteReposModal = async (repos: Repo[]): Promise<Repo | null
     document.body.appendChild(modal);
     const list = modal.querySelector("#favorite-repo-list") as HTMLDivElement;
     const cancelBtn = modal.querySelector("#favorite-repo-cancel") as HTMLButtonElement;
-    list.innerHTML = repos.map((repo, i) =>
+    list.innerHTML = favoriteRepos.map((repo: Repo, i: number) =>
       `<button type="button" style="display:block;width:100%;text-align:left;padding:8px 12px;margin-bottom:4px;background:linear-gradient(90deg,#6366f1 0%,#60a5fa 100%);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:1em;font-weight:bold;" class="favorite-repo-btn" data-idx="${i}">${repo.name}</button>`
     ).join("");
     list.querySelectorAll(".favorite-repo-btn").forEach(btn => {
@@ -40,7 +43,7 @@ export const showFavoriteReposModal = async (repos: Repo[]): Promise<Repo | null
         const idx = Number((btn as HTMLButtonElement).dataset.idx);
         document.body.removeChild(modal);
         // handleRepoSelectは呼び出し元で使うため、ここではresolveのみ
-        resolve(repos[idx]);
+        resolve(favoriteRepos[idx]);
       });
     });
     cancelBtn.onclick = () => {

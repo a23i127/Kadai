@@ -37,6 +37,7 @@ export class DataSaveService {
    */
   private static async saveRepositories(repos: Repo[]): Promise<void> {
     try {
+      console.log(repos);
       await postRepositoriesBatch(repos);
     } catch (error) {
       console.error('リポジトリデータの保存に失敗しました:', error);
