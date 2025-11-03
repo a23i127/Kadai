@@ -8,8 +8,7 @@ export const searchRepositories = async (
   setCurrentPath: (path: string) => void,
   setActiveRepo: (repo: Repo | null) => void,
   setLoading: (loading: boolean) => void,
-  setError: (err: string) => void,
-  setCacheAlert: (msg: string) => void
+  setError: (err: string) => void
 ) => {
   if (repoName === null) {
     // キャンセル時は何もしない
@@ -18,7 +17,6 @@ export const searchRepositories = async (
   try {
     setLoading(true);
     setError("");
-    setCacheAlert("");
     const params = repoName ? `?repo=${encodeURIComponent(repoName)}` : "";
     const res = await fetch(`/api/orgs/repos${params}`);
     if (!res.ok) throw new Error("APIリクエストに失敗しました");

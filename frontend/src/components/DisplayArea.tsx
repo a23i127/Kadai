@@ -1,10 +1,8 @@
 import { useState } from "react";
 import "./Display.css";
-import { postFileOrDirBatch } from "../feacher/dbPostHandlers/fileOrDir/fileOrDirPostHandle";
-import { postRepositoriesBatch } from "../feacher/dbPostHandlers/repository/repositoryHandle";
 import { showRepoNameCandidates } from "../feacher/searchRepository/showRepoNameCandidate";
 import type { Repo } from "../feacher/handleSerect/handleGetRepo/fetchRepo";
-import type { FileOrDir as FileOrDirApi } from "../feacher/dbPostHandlers/fileOrDir/fileOrDirFactory";
+import type { FileOrDir } from "../feacher/types/autoSaveTypes";
 import PopUp from "./popup/popUp";
 import Toggle from "./toggle/toggle";
 import { handleRepoSelect } from "../feacher/handleSerect/handleSerectRepo/selectRepo";
@@ -15,16 +13,7 @@ import { goToParentDir } from "../feacher/handleSerect/handleBackAction/handleBa
 import { showFavoriteReposModal } from "../feacher/favariteRepository/favariteComponent";
 import { handleTagAction } from "../feacher/handleSerect/handleTagAction/handleTagAction";
 import { useLoadMoreRepos } from "../feacher/hooks/useLoadMoreRepos";
-
-// ファイル/ディレクトリ型を拡張
-interface FileOrDir {
-  name: string;
-  url?: string;
-  type?: "file" | "dir";
-  path?: string;
-  content?: string;
-  fromCache?: boolean;
-}
+import { useAutoSave } from "../feacher/hooks/useAutoSave";
 
 // DBキャッシュ優先でファイル/ディレクトリ取得
 
@@ -38,8 +27,6 @@ const DisplayArea = () => {
   const [allFetchedItemsDict, setAllFetchedItemsDict] = useState<Record<number, FileOrDir[]>>({});
   const [showPopUp, setShowPopUp] = useState(false);
   const [popUpFile, setPopUpFile] = useState<FileOrDir | undefined>(undefined);
-  const [saveMessage, setSaveMessage] = useState("");
-  const [cacheAlert, setCacheAlert] = useState("");
   // お気に入りトグルでのみ更新されるactiveRepo用State（配列化）
   const [favoriteRepos, setFavoriteRepos] = useState<Repo[]>([]);
   // 手動読み込み表示モード
@@ -55,6 +42,9 @@ const DisplayArea = () => {
     resetRepos
   } = useLoadMoreRepos({ setRepos });
 
+  // 自動保存フック
+  useAutoSave({ repos, allFetchedItemsDict });
+
   // 検索ボタンのクリックハンドラ
   const handleSearchClick = async () => {
     // dbからリポジトリ取得して、あれば、その名前を検索候補として表示
@@ -66,8 +56,7 @@ const DisplayArea = () => {
       setCurrentPath,
       setActiveRepo,
       setLoading,
-      setError,
-      setCacheAlert
+      setError
     );
   };
 
@@ -93,7 +82,6 @@ const DisplayArea = () => {
   const handleClickItem = async (target: Repo | FileOrDir) => {
     setLoading(true);
     setError("");
-    setCacheAlert("");
     try {
       // クリック対象が Repo の場合
       if ("owner" in target) {
@@ -103,8 +91,7 @@ const DisplayArea = () => {
           setActiveRepo,
           setCurrentPath,
           setSelectedItems,
-          setAllFetchedItemsDict,
-          setCacheAlert
+          setAllFetchedItemsDict
         );
         return;
       }
@@ -120,7 +107,6 @@ const DisplayArea = () => {
             setSelectedItems,
             setCurrentPath,
             setAllFetchedItemsDict,
-            setCacheAlert,
           }
         );
         return;
@@ -134,7 +120,6 @@ const DisplayArea = () => {
             setAllFetchedItemsDict,
             setPopUpFile: (f) => setPopUpFile(f ?? undefined),
             setShowPopUp,
-            setCacheAlert,
             setError,
           }
         );
@@ -146,31 +131,6 @@ const DisplayArea = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  // 保存ボタンのハンドラ
-  const handleSaveAllFetchedItems = async () => {
-    setLoading(true);
-    setError("");
-    setSaveMessage("");
-    try {
-      // リポジトリデータをdb保存
-      await postRepositoriesBatch(repos);
-      
-      // allFetchedItemsDictの各リポジトリIDごとに保存
-      for (const repoIdStr of Object.keys(allFetchedItemsDict)) {
-        const repoId = Number(repoIdStr);
-        const items = allFetchedItemsDict[repoId];
-        if (items && items.length > 0) {
-          await postFileOrDirBatch(repoId, items as FileOrDirApi[]);
-        }
-      }
-      setSaveMessage("保存が完了しました！");
-    } catch {
-      setError("全ファイル・ディレクトリの保存に失敗しました");
-      setSaveMessage("");
-    }
-    setLoading(false);
   };
 
   // 戻る
@@ -208,8 +168,7 @@ const DisplayArea = () => {
         setActiveRepo,
         setCurrentPath,
         setSelectedItems,
-        setAllFetchedItemsDict,
-        setCacheAlert
+        setAllFetchedItemsDict
       );
     } else {
       // キャンセルや未選択時
@@ -241,20 +200,8 @@ const DisplayArea = () => {
           通常モードに戻る
         </button>
       )}
-      {Object.keys(allFetchedItemsDict).length > 0 && (
-        <button className="organization-btn save-all" onClick={handleSaveAllFetchedItems}>
-          <span>💾</span>
-          すべて保存
-        </button>
-      )}
       {(loading || loadMoreLoading) && <div className="loading">読み込み中...</div>}
       {(error || loadMoreError) && <div className="error">{error || loadMoreError}</div>}
-      {saveMessage && (
-        <div className="save-message">{saveMessage}</div>
-      )}
-      {cacheAlert && (
-        <div className="cache-alert">{cacheAlert}</div>
-      )}
       <div className="main-content-wrapper">
         <div className="main-content">
           {repos.length === 0 ? (
@@ -272,7 +219,7 @@ const DisplayArea = () => {
                         </span>
                         <Toggle onClick={() => {
                           if (activeRepo && !favoriteRepos.some(r => r.id === activeRepo.id)) {
-                            setFavoriteRepos(prev => [...prev, activeRepo]);
+                            setFavoriteRepos(prev => [...prev, activeRepo]);//apiを呼ぶ感じに変更させる
                           }
                         }}>★</Toggle>
                       </span>
