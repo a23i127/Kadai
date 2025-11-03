@@ -1,4 +1,4 @@
-import type { Repo } from "../fetchFileData/fetchRepo";
+import type { Repo } from "../handleSerect/handleGetRepo/fetchRepo";
 import type { FileOrDir } from "../getCash/getCash";
 
 export const searchRepositories = async (

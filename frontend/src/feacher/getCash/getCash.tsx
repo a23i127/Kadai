@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { Repo } from "../fetchFileData/fetchRepo";
+import type { Repo } from "../handleSerect/handleGetRepo/fetchRepo";
 
 export interface FileOrDir {
   name: string;

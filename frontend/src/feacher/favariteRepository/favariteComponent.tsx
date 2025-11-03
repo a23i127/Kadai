@@ -1,4 +1,4 @@
-import type { Repo } from "../fetchFileData/fetchRepo";
+import type { Repo } from "../handleSerect/handleGetRepo/fetchRepo";
 
 //似ている処理がsearch/Repository/showRepoNameCandidate.tsxにもあるが、dbに対してapiを叩く部分が違うため、別ファイルにしている
 
