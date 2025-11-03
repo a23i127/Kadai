@@ -14,6 +14,7 @@ import { showFavoriteReposModal } from "../feacher/favariteRepository/favariteCo
 import { handleTagAction } from "../feacher/handleSerect/handleTagAction/handleTagAction";
 import { useLoadMoreRepos } from "../feacher/handleSerect/handleGetRepo/useLoadMoreRepos";
 import { useAutoSave } from "../feacher/AutoSave/useAutoSave";
+import { useFavoriteToggle } from "../feacher/favariteRepository/useFavoriteToggle";
 
 // DBキャッシュ優先でファイル/ディレクトリ取得
 
@@ -27,8 +28,6 @@ const DisplayArea = () => {
   const [allFetchedItemsDict, setAllFetchedItemsDict] = useState<Record<number, FileOrDir[]>>({});
   const [showPopUp, setShowPopUp] = useState(false);
   const [popUpFile, setPopUpFile] = useState<FileOrDir | undefined>(undefined);
-  // お気に入りトグルでのみ更新されるactiveRepo用State（配列化）
-  const [favoriteRepos, setFavoriteRepos] = useState<Repo[]>([]);
   // 手動読み込み表示モード
   const [isLoadMoreMode, setIsLoadMoreMode] = useState(false);
   
@@ -44,6 +43,16 @@ const DisplayArea = () => {
 
   // 自動保存フック
   useAutoSave({ repos, allFetchedItemsDict });
+
+  // お気に入りToggle機能フック
+  const { handleFavoriteToggle, getFavoriteIcon } = useFavoriteToggle({
+    activeRepo,
+    repos,
+    setRepos,
+    setActiveRepo,
+    setLoading,
+    setError,
+  });
 
   // 検索ボタンのクリックハンドラ
   const handleSearchClick = async () => {
@@ -161,7 +170,7 @@ const DisplayArea = () => {
 
   // お気に入りディレクトリボタンのクリックハンドラ
   const handleFavoriteDirClick = async () => {
-    const selected = await showFavoriteReposModal(favoriteRepos);
+    const selected = await showFavoriteReposModal(repos);
     if (selected) {
       await handleRepoSelect(
         selected,
@@ -217,11 +226,9 @@ const DisplayArea = () => {
                         <span className="active-repo-name">
                           {activeRepo.name}
                         </span>
-                        <Toggle onClick={() => {
-                          if (activeRepo && !favoriteRepos.some(r => r.id === activeRepo.id)) {
-                            setFavoriteRepos(prev => [...prev, activeRepo]);//apiを呼ぶ感じに変更させる
-                          }
-                        }}>★</Toggle>
+                        <Toggle onClick={handleFavoriteToggle}>
+                          {getFavoriteIcon()}
+                        </Toggle>
                       </span>
                     )}
                     <button className="organization-btn back" onClick={handleBackClick}>
