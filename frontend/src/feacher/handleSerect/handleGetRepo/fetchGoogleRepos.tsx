@@ -36,7 +36,7 @@ export const fetchGoogleReposWithCache = async (page: number = 1, limit: number 
       }
       
       return {
-        repos: pageRepos.map(repo => ({ ...repo, fromCache: true })),
+        repos: pageRepos,
         linkHeader: null,
         hasNext,
         totalCached: cachedRepos.length
@@ -62,8 +62,8 @@ export const fetchGoogleReposWithCache = async (page: number = 1, limit: number 
     
     // 結果をマージ
     const mergedRepos = [
-      ...cachedPageRepos.map((repo: Repo) => ({ ...repo, fromCache: true })),
-      ...apiPageRepos.map((repo: Repo) => ({ ...repo, fromCache: false })) // APIから取得したデータはfalse
+      ...cachedPageRepos,
+      ...apiPageRepos
     ];
     
     // hasNextの判定を修正
@@ -86,7 +86,7 @@ export const fetchGoogleReposWithCache = async (page: number = 1, limit: number 
     const fallbackResult = await fetchGoogleReposWithHeaders(page, limit);
     return {
       ...fallbackResult,
-      repos: fallbackResult.repos.map((repo: Repo) => ({ ...repo, fromCache: false })), // フォールバック時もfalse
+      repos: fallbackResult.repos,
       totalCached: 0
     };
   }
@@ -106,7 +106,7 @@ export const fetchGoogleReposWithHeaders = async (page: number = 1, limit: numbe
     const linkHeader = response.headers.get('Link');
     
     return {
-      repos: data.map((repo: Repo) => ({ ...repo, fromCache: false })), // APIから取得したデータはfalse
+      repos: data,
       linkHeader,
       hasNext: hasNextPage(linkHeader),
       totalCached: 0
@@ -119,7 +119,7 @@ export const fetchGoogleReposWithHeaders = async (page: number = 1, limit: numbe
 // Google組織のリポジトリを取得する関数（従来互換）
 export const fetchGoogleRepos = async (page: number = 1, limit: number = 10): Promise<Repo[]> => {
   const { repos } = await fetchGoogleReposWithHeaders(page, limit);
-  return repos.map((repo: Repo) => ({ ...repo, fromCache: false })); // APIから取得したデータはfalse
+  return repos;
 };
 
 // Linkヘッダーから次のページがあるかチェック

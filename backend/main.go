@@ -38,6 +38,7 @@ func main() {
 		// キャッシュ取得API: /api/db/fileordir/:repoId/*path
 		api.GET("/db/fileordir/:repoId/*path", get_db_cash.HandleGetFileOrDirCache)
 		api.GET("/db/repos", getdbrepository.HandleGetRepositoriesCache)
+		api.GET("/db/repos/favorites", getdbrepository.HandleGetFavoriteRepositoriesCache)
 	}
 	r.Run(":3030")
 }

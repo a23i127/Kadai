@@ -5,9 +5,7 @@ import type { SaveData, UseAutoSaveOptions } from "./types/autoSaveTypes";
 export const useAutoSave = ({ 
   repos, 
   allFetchedItemsDict, 
-  intervalMs = 30000,
-  enableBeforeUnload = true,
-  enableVisibilityChange = true
+  enableBeforeUnload = true
 }: UseAutoSaveOptions) => {
   // 自動保存データを保持するref
   const autoSaveDataRef = useRef<SaveData>({ repos: [], allFetchedItemsDict: {} });
@@ -32,65 +30,29 @@ export const useAutoSave = ({
     }
   }, []);
 
-  // 定期的な自動保存
+  // ブラウザ終了時の自動保存のみ
   useEffect(() => {
-    const interval = setInterval(() => {
-      saveDataAutomatically();
-    }, intervalMs);
-
-    return () => clearInterval(interval);
-  }, [saveDataAutomatically, intervalMs]);
-
-  // ブラウザ終了時/ページ離脱時の自動保存
-  useEffect(() => {
-    if (!enableBeforeUnload && !enableVisibilityChange) {
-      return; // どちらも無効の場合はイベントリスナーを設定しない
+    if (!enableBeforeUnload) {
+      return; // 無効の場合はイベントリスナーを設定しない
     }
 
-    const handleBeforeUnload = (event: Event) => {
-      if (!enableBeforeUnload) return;
-      
+    const handleBeforeUnload = () => {
       const saveData = autoSaveDataRef.current;
       
       if (!DataSaveService.hasSaveableData(saveData)) {
         return;
       }
 
-      // データがある場合は保存処理を実行
-      saveDataAutomatically();
-      
-      // ブラウザに保存処理中であることを通知（オプション）
-      event.preventDefault();
-      if (event instanceof BeforeUnloadEvent) {
-        event.returnValue = '';
-      }
+      // データがある場合は同期的に保存処理を実行
+      DataSaveService.saveAllDataSync(saveData);
     };
 
-    const handleVisibilityChange = () => {
-      if (!enableVisibilityChange) return;
-      
-      if (document.visibilityState === 'hidden') {
-        saveDataAutomatically();
-      }
-    };
-
-    if (enableBeforeUnload) {
-      window.addEventListener('beforeunload', handleBeforeUnload);
-    }
-    
-    if (enableVisibilityChange) {
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-    }
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
-      if (enableBeforeUnload) {
-        window.removeEventListener('beforeunload', handleBeforeUnload);
-      }
-      if (enableVisibilityChange) {
-        document.removeEventListener('visibilitychange', handleVisibilityChange);
-      }
+      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [saveDataAutomatically, enableBeforeUnload, enableVisibilityChange]);
+  }, [saveDataAutomatically, enableBeforeUnload]);
 
   return {
     saveDataAutomatically

@@ -10,7 +10,7 @@ import { searchRepositories } from "../feacher/searchRepository/fuc";
 import { handleDirSelect } from "../feacher/handleSerect/handleSelectDirectory/selectDirectrory";
 import { handleFileSelect } from "../feacher/handleSerect/handleSelectFile/selectFile";
 import { goToParentDir } from "../feacher/handleSerect/handleBackAction/handleBackAction";
-import { showFavoriteReposModal } from "../feacher/favariteRepository/favariteComponent";
+import { showFavoriteReposModal } from "../feacher/handleSerect/handleSelectFavorite/favariteComponent";
 import { handleTagAction } from "../feacher/handleSerect/handleTagAction/handleTagAction";
 import { useLoadMoreRepos } from "../feacher/handleSerect/handleGetRepo/useLoadMoreRepos";
 import { useAutoSave } from "../feacher/AutoSave/useAutoSave";
@@ -71,12 +71,21 @@ const DisplayArea = () => {
 
   // Google組織リポジトリ（手動読み込み）のクリックハンドラ
   const handleLoadMoreClick = async () => {
-    setIsLoadMoreMode(true);
-    setSelectedItems([]);
-    setCurrentPath("");
-    setActiveRepo(null);
-    resetRepos();
-    await loadInitialRepos();
+    // 1回目：手動読み込みモードに入り、APIを呼ぶ
+    if (!isLoadMoreMode) {
+      setIsLoadMoreMode(true);
+      setSelectedItems([]);
+      setCurrentPath("");
+      setActiveRepo(null);
+      resetRepos();
+      await loadInitialRepos();
+    } else {
+      // 2回目以降：潜った階層をリセット（APIは呼ばない）
+      setSelectedItems([]);
+      setCurrentPath("");
+      setActiveRepo(null);
+      resetScrollPosition(); // スクロール位置もリセット
+    }
   };
 
   // 通常モードに戻るハンドラ
@@ -86,6 +95,14 @@ const DisplayArea = () => {
     setSelectedItems([]);
     setCurrentPath("");
     setActiveRepo(null);
+  };
+
+  // スクロール位置をリセットする関数
+  const resetScrollPosition = () => {
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+      mainContent.scrollTop = 0;
+    }
   };
 
   const handleClickItem = async (target: Repo | FileOrDir) => {
@@ -102,6 +119,7 @@ const DisplayArea = () => {
           setSelectedItems,
           setAllFetchedItemsDict
         );
+        resetScrollPosition(); // リポジトリ選択時にスクロールリセット
         return;
       }
       // クリック対象が FileOrDir の場合
@@ -118,6 +136,7 @@ const DisplayArea = () => {
             setAllFetchedItemsDict,
           }
         );
+        resetScrollPosition(); // ディレクトリ移動時にスクロールリセット
         return;
       }
       // 📄 ファイル
@@ -132,6 +151,7 @@ const DisplayArea = () => {
             setError,
           }
         );
+        // ファイル選択時はポップアップが開くだけなのでスクロールリセットは不要
         return;
       }
     } catch {
@@ -149,6 +169,7 @@ const DisplayArea = () => {
       setSelectedItems([]);
       setCurrentPath("");
       setActiveRepo(null);
+      resetScrollPosition(); // リポジトリ一覧に戻る時にスクロールリセット
       return;
     }
     setLoading(true);
@@ -161,6 +182,7 @@ const DisplayArea = () => {
         setCurrentPath,
         setActiveRepo as (v: Repo | null) => void
       );
+      resetScrollPosition(); // 親ディレクトリに戻る時にスクロールリセット
     } catch {
       setError("親ディレクトリ取得に失敗しました");
       setSelectedItems([]);
@@ -168,20 +190,27 @@ const DisplayArea = () => {
     setLoading(false);
   };
 
-  // お気に入りディレクトリボタンのクリックハンドラ
   const handleFavoriteDirClick = async () => {
-    const selected = await showFavoriteReposModal(repos);
-    if (selected) {
-      await handleRepoSelect(
-        selected,
-        setActiveRepo,
-        setCurrentPath,
-        setSelectedItems,
-        setAllFetchedItemsDict
-      );
-    } else {
-      // キャンセルや未選択時
-    }
+    const selected = await showFavoriteReposModal();
+    console.log("お気に入りリポジトリ選択結果:", selected);
+    
+    if (!selected) return;
+
+    // リポジトリリストに追加（重複チェック）
+    setRepos(prevRepos => {
+      const exists = prevRepos.some(repo => repo.id === selected.id);
+      return exists ? prevRepos : [...prevRepos, selected];
+    });
+    
+    // リポジトリの内容を取得して表示
+    await handleRepoSelect(
+      selected,
+      setActiveRepo,
+      setCurrentPath,
+      setSelectedItems,
+      setAllFetchedItemsDict
+    );
+    resetScrollPosition(); // お気に入りリポジトリ選択時にスクロールリセット
   };
 
   return (
@@ -200,8 +229,8 @@ const DisplayArea = () => {
         </div>
       </div>
       <button className="organization-btn load-more" onClick={handleLoadMoreClick}>
-        <span>📄</span>
-        Googleファイル読み込む
+        <span>{isLoadMoreMode ? "🔄" : "📄"}</span>
+        {isLoadMoreMode ? "一覧に戻る" : "Googleファイル読み込む"}
       </button>
       {isLoadMoreMode && (
         <button className="organization-btn back-normal" onClick={handleBackToNormalMode}>
