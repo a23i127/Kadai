@@ -9,12 +9,14 @@ type Owner struct {
 	AvatarURL string `json:"avatar_url"`
 }
 
+// Repository テーブル
 type Repository struct {
 	ID            uint   `gorm:"primaryKey" json:"id"`
 	Name          string `gorm:"index;not null" json:"name"`
 	FullName      string `gorm:"uniqueIndex;not null" json:"full_name"`
 	DefaultBranch string `json:"default_branch"`
 	Tag           string `json:"tag"`
+	Favorite      bool   `gorm:"default:false" json:"favorite"`
 	Owner         Owner  `gorm:"embedded;embeddedPrefix:owner_" json:"owner"`
 	CreatedAt     time.Time
 	UpdatedAt     time.Time

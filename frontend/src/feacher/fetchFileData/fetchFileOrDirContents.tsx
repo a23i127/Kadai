@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { Repo } from "./fetchRepo";
+import type { Repo } from "../handleSerect/handleGetRepo/fetchRepo";
 
 // GitHub APIのレスポンス型（最低限nameだけ持つ）
 type FileOrDir = { name: string; url?: string; type: "file" | "dir"; path: string; content?: string };

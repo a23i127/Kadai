@@ -1,4 +1,4 @@
-import type { Repo } from "./fetchRepo";
+import type { Repo } from "../handleSerect/handleGetRepo/fetchRepo";
 import { fetchFileOrDirContentsAction } from "./fetchFileOrDirContents";
 
 export async function fetchParentDir(

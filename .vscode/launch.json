@@ -13,10 +13,24 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Vite Chrome Debug",
+            "name": "Vite Chrome Debug (Manual)",
+            "url": "http://localhost:5173",
+            "webRoot": "${workspaceFolder}/frontend/src"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Vite Chrome Debug (Auto Start)",
             "url": "http://localhost:5173",
             "webRoot": "${workspaceFolder}/frontend/src",
-            "preLaunchTask": "npm: dev"
+            "preLaunchTask": "Start Dev Server"
+        },
+        {
+            "type": "chrome",
+            "request": "attach",
+            "name": "Vite Chrome Attach",
+            "port": 9222,
+            "webRoot": "${workspaceFolder}/frontend/src"
         }
     ]
 }

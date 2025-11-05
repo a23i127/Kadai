@@ -1,13 +1,15 @@
-import type { Repo } from "../../fetchFileData/fetchRepo";
+import type { Repo } from "../handleGetRepo/fetchRepo";
 
 /**
- * タグ付けアクションのサンプルハンドラー
+ * タグ付けアクションハンドラー - reposのstateを更新
  * @param activeRepo - 現在選択されているリポジトリ
  * @param currentPath - 現在のパス
+ * @param setRepos - reposのstate更新関数
  */
 export const handleTagAction = async (
   activeRepo: Repo | null,
-  currentPath: string
+  currentPath: string,
+  setRepos: (updateFn: (prevRepos: Repo[]) => Repo[]) => void
 ): Promise<void> => {
   try {
     if (!activeRepo) {
@@ -15,11 +17,22 @@ export const handleTagAction = async (
       return;
     }
 
-    // サンプル処理：タグ付けのダイアログを表示
-    const tagName = prompt(`${activeRepo.name}${currentPath ? ` (${currentPath})` : ""} にタグを付けますか？`, "important");
+    // タグ付けのダイアログを表示
+    const tagName = prompt(
+      `${activeRepo.name}${currentPath ? ` (${currentPath})` : ""} にタグを付けますか？`, 
+      activeRepo.tag || "important"
+    );
     
-    if (tagName && tagName.trim()) {
-      // ここで実際のタグ付けAPI呼び出しを行う
+    if (tagName !== null && tagName.trim()) {
+      // reposのstateを更新
+      setRepos((prevRepos) => 
+        prevRepos.map((repo) =>
+          repo.id === activeRepo.id
+            ? { ...repo, tag: tagName.trim() }
+            : repo
+        )
+      );
+      
       console.log(`タグ付け実行: リポジトリ=${activeRepo.name}, パス=${currentPath}, タグ=${tagName.trim()}`);
       
       // TODO: バックエンドAPIでタグを保存
