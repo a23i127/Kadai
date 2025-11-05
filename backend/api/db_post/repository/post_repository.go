@@ -30,6 +30,8 @@ func PostRepositoryBatch(c *gin.Context) {
 			"owner_html_url",
 			"owner_type",
 			"owner_avatar_url",
+			"tag",
+			"favorite",
 			"updated_at",
 		}),
 	}).CreateInBatches(items, 50).Error; err != nil {

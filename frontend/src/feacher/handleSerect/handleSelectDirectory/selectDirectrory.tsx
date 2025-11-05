@@ -1,6 +1,6 @@
 import { fetchFileOrDirWithCache } from "../../getCash/getCash";
 import { fetchFileOrDirContentsAction } from "../../fetchFileData/fetchFileOrDirContents";
-import type { Repo } from "../../fetchFileData/fetchRepo";
+import type { Repo } from "../handleGetRepo/fetchRepo";
 import type { FileOrDir } from "../../getCash/getCash";
 
 export async function handleDirSelect(
@@ -10,10 +10,9 @@ export async function handleDirSelect(
     setSelectedItems: (v: FileOrDir[]) => void;
     setCurrentPath: (v: string) => void;
     setAllFetchedItemsDict: React.Dispatch<React.SetStateAction<Record<number, FileOrDir[]>>>;
-    setCacheAlert: (v: string) => void;
   }
 ) {
-  const { setSelectedItems, setCurrentPath, setAllFetchedItemsDict, setCacheAlert } = deps;
+  const { setSelectedItems, setCurrentPath, setAllFetchedItemsDict } = deps;
 
   const items = await fetchFileOrDirWithCache(
     repo.id,
@@ -29,9 +28,5 @@ export async function handleDirSelect(
       ...prev,
       [repo.id]: [...(prev[repo.id] ?? []), ...items],
     }));
-  }
-
-  if (items.length > 0 && items[0] && (items[0] as FileOrDir).fromCache) {
-    setCacheAlert("キャッシュから取得しました");
   }
 }

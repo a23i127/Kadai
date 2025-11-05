@@ -1,5 +1,5 @@
 import { fetchFileOrDirContentsAction } from "../../fetchFileData/fetchFileOrDirContents";
-import type { Repo } from "../../fetchFileData/fetchRepo";
+import type { Repo } from "../handleGetRepo/fetchRepo";
 import type { FileOrDir } from "../../getCash/getCash";
 
 // リポジトリ一覧に戻る

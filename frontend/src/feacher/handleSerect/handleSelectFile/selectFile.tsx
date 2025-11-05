@@ -1,6 +1,6 @@
 import { fetchFileOrDirContentsAction } from "../../fetchFileData/fetchFileOrDirContents";
 import { fetchFileOrDirWithCache } from "../../getCash/getCash";
-import type { Repo } from "../../fetchFileData/fetchRepo";
+import type { Repo } from "../handleGetRepo/fetchRepo";
 import type { FileOrDir } from "../../getCash/getCash";
 
 export async function handleFileSelect(
@@ -10,22 +10,35 @@ export async function handleFileSelect(
     setAllFetchedItemsDict: React.Dispatch<React.SetStateAction<Record<number, FileOrDir[]>>>;
     setPopUpFile: (f: FileOrDir | null) => void;
     setShowPopUp: (v: boolean) => void;
-    setCacheAlert: (v: string) => void;
     setError: (s: string) => void;
   }
 ) {
-  const { setAllFetchedItemsDict, setPopUpFile, setShowPopUp, setCacheAlert, setError } = deps;
+  const { setAllFetchedItemsDict, setPopUpFile, setShowPopUp, setError } = deps;
 
   let items: FileOrDir[] = [];
+
+  // まずキャッシュから取得を試行
   try {
-    items = await fetchFileOrDirContentsAction(repo, filePath); // API優先
-  } catch {
     items = await fetchFileOrDirWithCache(repo.id, filePath, () => Promise.resolve([]));
+  } catch {
+    // キャッシュ取得失敗時は items は空のまま
   }
 
-  if (items.length === 0) {
-    setError("ファイルが見つかりません");
-    return;
+  // キャッシュにデータがない場合、またはcontentが空の場合にAPIから取得
+  const hasValidContent = items.length > 0 && items[0]?.content && items[0].content.trim() !== "";
+  
+  if (items.length === 0 || !hasValidContent) {
+    try {
+      items = await fetchFileOrDirContentsAction(repo, filePath);
+      
+      if (items.length === 0) {
+        setError("ファイルが見つかりません");
+        return;
+      }
+    } catch {
+      setError("ファイルの取得に失敗しました");
+      return;
+    }
   }
 
   const fileWithContent = items[0];
@@ -39,8 +52,4 @@ export async function handleFileSelect(
 
   setPopUpFile(fileWithContent);
   setShowPopUp(true);
-
-  if ((fileWithContent as FileOrDir)?.fromCache) {
-    setCacheAlert("キャッシュから取得しました");
-  }
 }

@@ -1,0 +1,50 @@
+[
+  {
+    "name": "awesome-frontend",
+    "full_name": "testuser/awesome-frontend",
+    "default_branch": "main",
+    "tag": "frontend",
+    "owner": {
+      "login": "testuser",
+      "html_url": "https://github.com/testuser",
+      "type": "User",
+      "avatar_url": "https://avatars.githubusercontent.com/u/123456"
+    }
+  },
+  {
+    "name": "backend-api",
+    "full_name": "testuser/backend-api",
+    "default_branch": "master",
+    "tag": "backend",
+    "owner": {
+      "login": "testuser",
+      "html_url": "https://github.com/testuser",
+      "type": "User",
+      "avatar_url": "https://avatars.githubusercontent.com/u/123456"
+    }
+  },
+  {
+    "name": "ml-project",
+    "full_name": "companyorg/ml-project",
+    "default_branch": "develop",
+    "tag": "machine-learning",
+    "owner": {
+      "login": "companyorg",
+      "html_url": "https://github.com/companyorg",
+      "type": "Organization",
+      "avatar_url": "https://avatars.githubusercontent.com/u/789012"
+    }
+  },
+  {
+    "name": "docs-site",
+    "full_name": "testuser/docs-site",
+    "default_branch": "main",
+    "tag": "documentation",
+    "owner": {
+      "login": "testuser",
+      "html_url": "https://github.com/testuser",
+      "type": "User",
+      "avatar_url": "https://avatars.githubusercontent.com/u/123456"
+    }
+  }
+]

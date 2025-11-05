@@ -1,29 +1,20 @@
 import { useState } from "react";
 import "./Display.css";
-import { postFileOrDirBatch } from "../feacher/dbPostHandlers/fileOrDir/fileOrDirPostHandle";
 import { showRepoNameCandidates } from "../feacher/searchRepository/showRepoNameCandidate";
-import type { Repo } from "../feacher/fetchFileData/fetchRepo";
-import type { FileOrDir as FileOrDirApi } from "../feacher/dbPostHandlers/fileOrDir/fileOrDirFactory";
+import type { Repo } from "../feacher/handleSerect/handleGetRepo/fetchRepo";
+import type { FileOrDir } from "../feacher/AutoSave/types/autoSaveTypes";
 import PopUp from "./popup/popUp";
 import Toggle from "./toggle/toggle";
 import { handleRepoSelect } from "../feacher/handleSerect/handleSerectRepo/selectRepo";
-import { handleFetchAllRepos } from "../feacher/handleSerect/hadleGetAllRepo/getAllRepo";
 import { searchRepositories } from "../feacher/searchRepository/fuc";
 import { handleDirSelect } from "../feacher/handleSerect/handleSelectDirectory/selectDirectrory";
 import { handleFileSelect } from "../feacher/handleSerect/handleSelectFile/selectFile";
 import { goToParentDir } from "../feacher/handleSerect/handleBackAction/handleBackAction";
-import { showFavoriteReposModal } from "../feacher/favariteRepository/favariteComponent";
+import { showFavoriteReposModal } from "../feacher/handleSerect/handleSelectFavorite/favariteComponent";
 import { handleTagAction } from "../feacher/handleSerect/handleTagAction/handleTagAction";
-
-// ファイル/ディレクトリ型を拡張
-interface FileOrDir {
-  name: string;
-  url?: string;
-  type?: "file" | "dir";
-  path?: string;
-  content?: string;
-  fromCache?: boolean;
-}
+import { useLoadMoreRepos } from "../feacher/handleSerect/handleGetRepo/useLoadMoreRepos";
+import { useAutoSave } from "../feacher/AutoSave/useAutoSave";
+import { useFavoriteToggle } from "../feacher/favariteRepository/useFavoriteToggle";
 
 // DBキャッシュ優先でファイル/ディレクトリ取得
 
@@ -37,10 +28,31 @@ const DisplayArea = () => {
   const [allFetchedItemsDict, setAllFetchedItemsDict] = useState<Record<number, FileOrDir[]>>({});
   const [showPopUp, setShowPopUp] = useState(false);
   const [popUpFile, setPopUpFile] = useState<FileOrDir | undefined>(undefined);
-  const [saveMessage, setSaveMessage] = useState("");
-  const [cacheAlert, setCacheAlert] = useState("");
-  // お気に入りトグルでのみ更新されるactiveRepo用State（配列化）
-  const [favoriteRepos, setFavoriteRepos] = useState<Repo[]>([]);
+  // 手動読み込み表示モード
+  const [isLoadMoreMode, setIsLoadMoreMode] = useState(false);
+  
+  // 手動読み込みフック
+  const {
+    isLoading: loadMoreLoading,
+    fetchError: loadMoreError,
+    hasMore,
+    loadInitialRepos,
+    loadMoreRepos,
+    resetRepos
+  } = useLoadMoreRepos({ setRepos });
+
+  // 自動保存フック
+  useAutoSave({ repos, allFetchedItemsDict });
+
+  // お気に入りToggle機能フック
+  const { handleFavoriteToggle, getFavoriteIcon } = useFavoriteToggle({
+    activeRepo,
+    repos,
+    setRepos,
+    setActiveRepo,
+    setLoading,
+    setError,
+  });
 
   // 検索ボタンのクリックハンドラ
   const handleSearchClick = async () => {
@@ -53,28 +65,50 @@ const DisplayArea = () => {
       setCurrentPath,
       setActiveRepo,
       setLoading,
-      setError,
-      setCacheAlert
+      setError
     );
   };
 
-  const handleClickItem = async (target: Repo | FileOrDir | null) => {
+  // Google組織リポジトリ（手動読み込み）のクリックハンドラ
+  const handleLoadMoreClick = async () => {
+    // 1回目：手動読み込みモードに入り、APIを呼ぶ
+    if (!isLoadMoreMode) {
+      setIsLoadMoreMode(true);
+      setSelectedItems([]);
+      setCurrentPath("");
+      setActiveRepo(null);
+      resetRepos();
+      await loadInitialRepos();
+    } else {
+      // 2回目以降：潜った階層をリセット（APIは呼ばない）
+      setSelectedItems([]);
+      setCurrentPath("");
+      setActiveRepo(null);
+      resetScrollPosition(); // スクロール位置もリセット
+    }
+  };
+
+  // 通常モードに戻るハンドラ
+  const handleBackToNormalMode = () => {
+    setIsLoadMoreMode(false);
+    setRepos([]);
+    setSelectedItems([]);
+    setCurrentPath("");
+    setActiveRepo(null);
+  };
+
+  // スクロール位置をリセットする関数
+  const resetScrollPosition = () => {
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+      mainContent.scrollTop = 0;
+    }
+  };
+
+  const handleClickItem = async (target: Repo | FileOrDir) => {
     setLoading(true);
     setError("");
-    setCacheAlert("");
     try {
-      if (target === null) {
-        // リポジトリ一覧取得（キャッシュ優先）
-        await handleFetchAllRepos(
-          setRepos,
-          setSelectedItems,
-          setCurrentPath,
-          setActiveRepo,
-          setLoading,
-          setError
-        );
-        return;
-      }
       // クリック対象が Repo の場合
       if ("owner" in target) {
         const repo = target as Repo;
@@ -83,9 +117,9 @@ const DisplayArea = () => {
           setActiveRepo,
           setCurrentPath,
           setSelectedItems,
-          setAllFetchedItemsDict,
-          setCacheAlert
+          setAllFetchedItemsDict
         );
+        resetScrollPosition(); // リポジトリ選択時にスクロールリセット
         return;
       }
       // クリック対象が FileOrDir の場合
@@ -100,9 +134,9 @@ const DisplayArea = () => {
             setSelectedItems,
             setCurrentPath,
             setAllFetchedItemsDict,
-            setCacheAlert,
           }
         );
+        resetScrollPosition(); // ディレクトリ移動時にスクロールリセット
         return;
       }
       // 📄 ファイル
@@ -114,10 +148,10 @@ const DisplayArea = () => {
             setAllFetchedItemsDict,
             setPopUpFile: (f) => setPopUpFile(f ?? undefined),
             setShowPopUp,
-            setCacheAlert,
             setError,
           }
         );
+        // ファイル選択時はポップアップが開くだけなのでスクロールリセットは不要
         return;
       }
     } catch {
@@ -128,28 +162,6 @@ const DisplayArea = () => {
     }
   };
 
-  // 保存ボタンのハンドラ
-  const handleSaveAllFetchedItems = async () => {
-    setLoading(true);
-    setError("");
-    setSaveMessage("");
-    try {
-      // allFetchedItemsDictの各リポジトリIDごとに保存
-      for (const repoIdStr of Object.keys(allFetchedItemsDict)) {
-        const repoId = Number(repoIdStr);
-        const items = allFetchedItemsDict[repoId];
-        if (items && items.length > 0) {
-          await postFileOrDirBatch(repoId, items as FileOrDirApi[]);
-        }
-      }
-      setSaveMessage("保存が完了しました！");
-    } catch {
-      setError("全ファイル・ディレクトリの保存に失敗しました");
-      setSaveMessage("");
-    }
-    setLoading(false);
-  };
-
   // 戻る
   const handleBackClick = async () => {
     if (!activeRepo) {
@@ -157,6 +169,7 @@ const DisplayArea = () => {
       setSelectedItems([]);
       setCurrentPath("");
       setActiveRepo(null);
+      resetScrollPosition(); // リポジトリ一覧に戻る時にスクロールリセット
       return;
     }
     setLoading(true);
@@ -169,6 +182,7 @@ const DisplayArea = () => {
         setCurrentPath,
         setActiveRepo as (v: Repo | null) => void
       );
+      resetScrollPosition(); // 親ディレクトリに戻る時にスクロールリセット
     } catch {
       setError("親ディレクトリ取得に失敗しました");
       setSelectedItems([]);
@@ -176,121 +190,138 @@ const DisplayArea = () => {
     setLoading(false);
   };
 
-  // お気に入りディレクトリボタンのクリックハンドラ
   const handleFavoriteDirClick = async () => {
-    const selected = await showFavoriteReposModal(favoriteRepos);
-    if (selected) {
-      await handleRepoSelect(
-        selected,
-        setActiveRepo,
-        setCurrentPath,
-        setSelectedItems,
-        setAllFetchedItemsDict,
-        setCacheAlert
-      );
-    } else {
-      // キャンセルや未選択時
-    }
+    const selected = await showFavoriteReposModal();
+    console.log("お気に入りリポジトリ選択結果:", selected);
+    
+    if (!selected) return;
+
+    // リポジトリリストに追加（重複チェック）
+    setRepos(prevRepos => {
+      const exists = prevRepos.some(repo => repo.id === selected.id);
+      return exists ? prevRepos : [...prevRepos, selected];
+    });
+    
+    // リポジトリの内容を取得して表示
+    await handleRepoSelect(
+      selected,
+      setActiveRepo,
+      setCurrentPath,
+      setSelectedItems,
+      setAllFetchedItemsDict
+    );
+    resetScrollPosition(); // お気に入りリポジトリ選択時にスクロールリセット
   };
 
   return (
-    <div className="display-area" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #e0e7ff 0%, #fff 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', paddingTop: 48 }}>
-      <div style={{ width: 600, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, position: 'relative' }}>
-        <h1 style={{ color: '#222', fontWeight: 'bold', fontSize: '2.2em', letterSpacing: '0.04em', margin: 0 }}>Repository Explorer</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button className="organization-btn" style={{ background: '#fff', color: '#6366f1', border: '1.5px solid #6366f1', borderRadius: 10, fontWeight: 'bold', fontSize: '1.1em', padding: '10px 32px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(99,102,241,0.10)', transition: 'background 0.2s, color 0.2s' }} onClick={handleSearchClick}>
-            🔍 検索
+    <div className="display-area">
+      <div className="header-container">
+        <h1 className="app-title">Repository Explorer</h1>
+        <div className="header-buttons">
+          <button className="organization-btn search" onClick={handleSearchClick}>
+            <span>🔍</span>
+            検索
           </button>
-          <button className="favorite-dir-btn" style={{ background: 'linear-gradient(90deg, #60a5fa 0%, #6366f1 100%)', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 'bold', fontSize: '1.05em', padding: '10px 22px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(99,102,241,0.10)', transition: 'background 0.2s' }} onClick={handleFavoriteDirClick}>
-            お気に入りディレクトリ
+          <button className="organization-btn favorite" onClick={handleFavoriteDirClick}>
+            <span>⭐</span>
+            お気に入り
           </button>
         </div>
       </div>
-      <button className="organization-btn" onClick={() => handleClickItem(null)} style={{ marginBottom: 24, background: 'linear-gradient(90deg, #6366f1 0%, #60a5fa 100%)', color: '#fff', fontWeight: 'bold', fontSize: '1.15em', borderRadius: 10, padding: '12px 32px', boxShadow: '0 2px 8px rgba(99,102,241,0.10)', border: 'none', letterSpacing: '0.04em', transition: 'background 0.2s' }}>
-        リポジトリ取得
+      <button className="organization-btn load-more" onClick={handleLoadMoreClick}>
+        <span>{isLoadMoreMode ? "🔄" : "📄"}</span>
+        {isLoadMoreMode ? "一覧に戻る" : "Googleファイル読み込む"}
       </button>
-      {Object.keys(allFetchedItemsDict).length > 0 && (
-        <button className="organization-btn" onClick={handleSaveAllFetchedItems} style={{ marginBottom: 24, background: '#4caf50', color: '#fff', boxShadow: '0 2px 8px rgba(76,175,80,0.2)', fontWeight: 'bold', fontSize: '1.1em', letterSpacing: '0.05em', borderRadius: 10, padding: '10px 32px', border: 'none' }}>
-          すべて保存
+      {isLoadMoreMode && (
+        <button className="organization-btn back-normal" onClick={handleBackToNormalMode}>
+          <span>←</span>
+          通常モードに戻る
         </button>
       )}
-      {loading && <div className="loading" style={{ marginBottom: 16 }}>読み込み中...</div>}
-      {error && <div className="error" style={{ marginBottom: 16 }}>{error}</div>}
-      {saveMessage && (
-        <div style={{ color: '#4caf50', fontWeight: 'bold', marginBottom: 16, fontSize: '1.1em', borderRadius: 8, background: '#e8f5e9', padding: '8px 16px', boxShadow: '0 2px 8px rgba(76,175,80,0.10)' }}>{saveMessage}</div>
-      )}
-      {cacheAlert && (
-        <div style={{ background: '#ffe082', color: '#333', fontWeight: 'bold', marginBottom: 16, fontSize: '1.1em', borderRadius: 8, padding: '8px 16px', boxShadow: '0 2px 8px rgba(255,193,7,0.15)' }}>{cacheAlert}</div>
-      )}
-      <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-        <div style={{ width: 650, background: '#fff', borderRadius: 20, boxShadow: '0 4px 24px rgba(99,102,241,0.10)', padding: 40, marginTop: 16, minHeight: 400 }}>
+      {(loading || loadMoreLoading) && <div className="loading">読み込み中...</div>}
+      {(error || loadMoreError) && <div className="error">{error || loadMoreError}</div>}
+      <div className="main-content-wrapper">
+        <div className="main-content">
           {repos.length === 0 ? (
-            <span style={{ color: '#888', fontSize: '1.15em', fontWeight: 'bold', letterSpacing: '0.03em' }}>リポジトリ表示領域およびファイル表示領域</span>
+            <span className="empty-state">リポジトリ表示領域およびファイル表示領域</span>
           ) : (
-            <ul className="repo-list" style={{ padding: 0 }}>
+            <ul className="repo-list">
               {selectedItems.length > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className="navigation-area">
+                  <div className="navigation-left">
                     {/* activeRepo名＋星トグルを一体化 */}
                     {activeRepo && (
-                      <span style={{ display: 'flex', alignItems: 'center', marginRight: 16, background: '#eef2ff', borderRadius: 8, padding: '6px 16px' }}>
-                        <span style={{ color: '#6366f1', fontWeight: 'bold', fontSize: '1.08em', marginRight: 8 }}>
+                      <span className="active-repo-info">
+                        <span className="active-repo-name">
                           {activeRepo.name}
                         </span>
-                        <Toggle onClick={() => {
-                          if (activeRepo && !favoriteRepos.some(r => r.id === activeRepo.id)) {
-                            setFavoriteRepos(prev => [...prev, activeRepo]);
-                          }
-                        }}>★</Toggle>
+                        <Toggle onClick={handleFavoriteToggle}>
+                          {getFavoriteIcon()}
+                        </Toggle>
                       </span>
                     )}
-                    <button className="organization-btn" style={{ background: "#eee", color: "#333", fontWeight: 'bold', fontSize: '1em', borderRadius: 8, padding: '8px 24px', border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }} onClick={handleBackClick}>
-                      ← 一つ前に戻る
+                    <button className="organization-btn back" onClick={handleBackClick}>
+                      <span>←</span>
+                      一つ前に戻る
                     </button>
                   </div>
                   {/* タグ付けボタンを右端に配置 */}
                   <button 
-                    style={{
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: 8,
-                      padding: '8px 16px',
-                      fontSize: '0.9em',
-                      fontWeight: 'bold',
-                      cursor: 'pointer',
-                      boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onClick={() => handleTagAction(activeRepo, currentPath)}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-1px)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(102, 126, 234, 0.3)';
-                    }}
+                    className="tag-button"
+                    onClick={() => handleTagAction(activeRepo, currentPath, setRepos)}
                   >
-                    🏷️ タグ付け
+                    <span>🏷️</span>
+                    タグ付け
                   </button>
                 </div>
               )}
               {selectedItems.length > 0
                 ? selectedItems.map((item, idx) => (
-                    <li key={idx} className="repo-list-item" style={{ marginBottom: 10, borderRadius: 8, background: '#f3f4f6', boxShadow: '0 1px 4px rgba(99,102,241,0.04)', padding: '8px 0' }}>
-                      <button className="repo-link" style={{ background: "#222", color: "#39ff14", border: "none", padding: '10px 20px', borderRadius: 8, cursor: "pointer", fontWeight: 'bold', fontSize: '1.08em', width: '100%', textAlign: 'left', transition: 'background 0.2s', letterSpacing: '0.02em' }} onClick={() => handleClickItem(item)}>
+                    <li key={idx} className="repo-list-item">
+                      <button className="repo-link file-dir" onClick={() => handleClickItem(item)}>
                         {item.name}
                       </button>
                     </li>
                   ))
-                : repos.map(repo => (
-                    <li key={repo.id} className="repo-list-item" style={{ marginBottom: 10, borderRadius: 8, background: '#f3f4f6', boxShadow: '0 1px 4px rgba(99,102,241,0.04)', padding: '8px 0' }}>
-                      <button className="repo-link" style={{ background: "linear-gradient(90deg, #6366f1 0%, #60a5fa 100%)", color: "#fff", border: "none", padding: '14px 28px', borderRadius: 10, cursor: "pointer", fontWeight: 'bold', fontSize: '1.13em', width: '100%', textAlign: 'left', boxShadow: '0 2px 8px rgba(99,102,241,0.10)', transition: 'background 0.2s', letterSpacing: '0.03em' }} onClick={() => handleClickItem(repo)}>
-                        {repo.name}
+                : repos.map((repo) => (
+                    <li 
+                      key={repo.id} 
+                      className="repo-list-item"
+                    >
+                      <button className="repo-link repository" onClick={() => handleClickItem(repo)}>
+                        <span>{repo.name}</span>
+                        {repo.tag && (
+                          <span className="repo-tag">
+                            🏷️ {repo.tag}
+                          </span>
+                        )}
                       </button>
                     </li>
                   ))}
+              
+              {/* 手動読み込みモードの場合、Load Moreボタンとステータス表示 */}
+              {isLoadMoreMode && (
+                <li className="load-more-controls">
+                  {loadMoreLoading && (
+                    <div className="loading-indicator">
+                      <span>🔄</span> 読み込み中...
+                    </div>
+                  )}
+                  {!loadMoreLoading && hasMore && (
+                    <button 
+                      className="load-more-btn" 
+                      onClick={loadMoreRepos}
+                    >
+                      <span>⬇️</span> さらに読み込む
+                    </button>
+                  )}
+                  {!hasMore && repos.length > 0 && (
+                    <div className="end-message">
+                      すべてのリポジトリを読み込みました
+                    </div>
+                  )}
+                </li>
+              )}
             </ul>
           )}
         </div>

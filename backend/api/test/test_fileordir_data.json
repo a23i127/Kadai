@@ -1,0 +1,80 @@
+[
+  {
+    "repo_id": 1936771,
+    "name": "README.md",
+    "path": "README.md",
+    "type": "file",
+    "url": "https://api.github.com/repos/google/truth/contents/README.md",
+    "html_url": "https://github.com/google/truth/blob/master/README.md",
+    "download_url": "https://raw.githubusercontent.com/google/truth/master/README.md",
+    "sha": "abc123def456789",
+    "size": 2048,
+    "content": "# Truth - Fluent assertions for Java and Android\n\nTruth makes your test assertions and failure messages more readable.\n\n## Getting Started\n\n```java\nimport static com.google.common.truth.Truth.assertThat;\n\nassertThat(someString).isEqualTo(\"expected\");\nassertThat(someList).contains(\"item\");\n```\n\n## Features\n\n- Fluent API for clear assertions\n- Rich failure messages\n- Extensive matcher library",
+    "parent": ""
+  },
+  {
+    "repo_id": 1936771,
+    "name": "src",
+    "path": "src",
+    "type": "dir",
+    "url": "https://api.github.com/repos/google/truth/contents/src",
+    "html_url": "https://github.com/google/truth/tree/master/src",
+    "download_url": "",
+    "sha": "def456abc789123",
+    "size": 0,
+    "content": "",
+    "parent": ""
+  },
+  {
+    "repo_id": 1936771,
+    "name": "main",
+    "path": "src/main",
+    "type": "dir",
+    "url": "https://api.github.com/repos/google/truth/contents/src/main",
+    "html_url": "https://github.com/google/truth/tree/master/src/main",
+    "download_url": "",
+    "sha": "ghi789jkl012345",
+    "size": 0,
+    "content": "",
+    "parent": "src"
+  },
+  {
+    "repo_id": 1936771,
+    "name": "java",
+    "path": "src/main/java",
+    "type": "dir",
+    "url": "https://api.github.com/repos/google/truth/contents/src/main/java",
+    "html_url": "https://github.com/google/truth/tree/master/src/main/java",
+    "download_url": "",
+    "sha": "jkl012mno345678",
+    "size": 0,
+    "content": "",
+    "parent": "src/main"
+  },
+  {
+    "repo_id": 1936771,
+    "name": "Truth.java",
+    "path": "src/main/java/com/google/common/truth/Truth.java",
+    "type": "file",
+    "url": "https://api.github.com/repos/google/truth/contents/src/main/java/com/google/common/truth/Truth.java",
+    "html_url": "https://github.com/google/truth/blob/master/src/main/java/com/google/common/truth/Truth.java",
+    "download_url": "https://raw.githubusercontent.com/google/truth/master/src/main/java/com/google/common/truth/Truth.java",
+    "sha": "mno345pqr678901",
+    "size": 512,
+    "content": "package com.google.common.truth;\n\nimport static com.google.common.truth.Fact.fact;\nimport static com.google.common.truth.Fact.simpleFact;\n\npublic final class Truth {\n  private Truth() {}\n\n  public static <T> Subject<T> assertThat(T actual) {\n    return StandardSubjectBuilder.forActual(actual);\n  }\n\n  public static StringSubject assertThat(String actual) {\n    return new StringSubject(actual);\n  }\n}",
+    "parent": "src/main/java/com/google/common/truth"
+  },
+  {
+    "repo_id": 1936771,
+    "name": "pom.xml",
+    "path": "pom.xml",
+    "type": "file",
+    "url": "https://api.github.com/repos/google/truth/contents/pom.xml",
+    "html_url": "https://github.com/google/truth/blob/master/pom.xml",
+    "download_url": "https://raw.githubusercontent.com/google/truth/master/pom.xml",
+    "sha": "pqr678stu901234",
+    "size": 1536,
+    "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n  <modelVersion>4.0.0</modelVersion>\n  \n  <groupId>com.google.truth</groupId>\n  <artifactId>truth</artifactId>\n  <version>1.1.5</version>\n  <packaging>jar</packaging>\n  \n  <name>Truth</name>\n  <description>Fluent assertions for Java and Android</description>",
+    "parent": ""
+  }
+]

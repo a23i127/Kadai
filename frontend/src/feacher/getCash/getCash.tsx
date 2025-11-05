@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { Repo } from "../fetchFileData/fetchRepo";
+import type { Repo } from "../handleSerect/handleGetRepo/fetchRepo";
 
 export interface FileOrDir {
   name: string;
@@ -7,7 +7,6 @@ export interface FileOrDir {
   type?: "file" | "dir";
   path?: string;
   content?: string;
-  fromCache?: boolean;
 }
 
 export const fetchFileOrDirWithCache = async (
@@ -29,8 +28,7 @@ export const fetchFileOrDirWithCache = async (
         url: item.url,
         type: item.type,
         path: item.path,
-        content: item.content,
-        fromCache: true
+        content: item.content
       }));
     }
   } catch (e) {
@@ -44,7 +42,7 @@ export const fetchFileOrDirWithCache = async (
 
   // フォールバック：GitHub API などから取得
   const apiItems = await fetchFromApi();
-  return apiItems.map(item => ({ ...item, fromCache: false }));
+  return apiItems;
 };
 
 export const fetchReposWithCache = async (setRepos: (repos: Repo[]) => void, setLoading: (loading: boolean) => void, setError: (err: string) => void) => {

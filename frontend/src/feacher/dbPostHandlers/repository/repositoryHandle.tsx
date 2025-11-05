@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { Repo } from "../../fetchFileData/fetchRepo";
+import type { Repo } from "../../handleSerect/handleGetRepo/fetchRepo";
 import { createRepository } from "./repositoryFactory";
 
 export async function postRepositoriesBatch(items: Repo[]): Promise<{ error?: string } | Repo[]> {

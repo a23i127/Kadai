@@ -1,6 +1,6 @@
 import { fetchFileOrDirWithCache } from "../../getCash/getCash";
 import { fetchFileOrDirContentsAction } from "../../fetchFileData/fetchFileOrDirContents";
-import type { Repo } from "../../fetchFileData/fetchRepo";
+import type { Repo } from "../handleGetRepo/fetchRepo";
 import type { FileOrDir } from "../../getCash/getCash";
 
 
@@ -9,8 +9,7 @@ export const handleRepoSelect = async (
   setActiveRepo: (repo: Repo) => void,
   setCurrentPath: (path: string) => void,
   setSelectedItems: (items: FileOrDir[]) => void,
-  setAllFetchedItemsDict: React.Dispatch<React.SetStateAction<Record<number, FileOrDir[]>>>,
-  setCacheAlert: (msg: string) => void
+  setAllFetchedItemsDict: React.Dispatch<React.SetStateAction<Record<number, FileOrDir[]>>>
 ) => {
   setActiveRepo(repo);
   setCurrentPath("");
@@ -30,10 +29,5 @@ export const handleRepoSelect = async (
       ...prev,
       [repo.id]: [...(prev[repo.id] ?? []), ...items],
     }));
-  }
-
-  // キャッシュから取得した場合はアラート表示
-  if (items.length > 0 && items[0].fromCache) {
-    setCacheAlert("キャッシュから取得しました");
   }
 };
