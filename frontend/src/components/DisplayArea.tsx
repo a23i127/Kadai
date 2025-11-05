@@ -14,6 +14,7 @@ import { handleFileSelect } from "../feacher/handleSerect/handleSelectFile/selec
 import { goToParentDir } from "../feacher/handleSerect/handleBackAction/handleBackAction";
 import { showFavoriteReposModal } from "../feacher/favariteRepository/favariteComponent";
 import { handleTagAction } from "../feacher/handleSerect/handleTagAction/handleTagAction";
+import { useAutoSave } from "../feacher/AutoSave/useAutoSave";
 
 // ファイル/ディレクトリ型を拡張
 interface FileOrDir {
@@ -41,6 +42,9 @@ const DisplayArea = () => {
   const [cacheAlert, setCacheAlert] = useState("");
   // お気に入りトグルでのみ更新されるactiveRepo用State（配列化）
   const [favoriteRepos, setFavoriteRepos] = useState<Repo[]>([]);
+
+  // 自動保存フック
+  useAutoSave({ repos, allFetchedItemsDict });
 
   // 検索ボタンのクリックハンドラ
   const handleSearchClick = async () => {
