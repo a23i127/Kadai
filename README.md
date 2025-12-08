@@ -30,7 +30,49 @@
 - リポジトリアクセス時にDBへ保存し、次回はDBから読み込むキャッシュ構造にしている。  
 
 ---
+🎯 要件定義（Requirements）
 
+本プロダクトでは、「GitHub リポジトリ閲覧体験の効率化」を目的として、
+以下の機能要件を満たす設計・実装を行っています。
+
+⸻
+
+1. 📡 GitHub API からリポジトリ情報を取得できること
+	•	GitHub REST API を利用し、指定組織（例：google）のリポジトリ情報を取得する。
+	•	初回アクセス時は必ず API を叩き、最新のリポジトリデータを取得する。
+	•	API 通信では、ページネーション対応・エラーハンドリングを適切に行う。
+
+⸻
+
+2. 💾 一度取得したリポジトリは DB にキャッシュし、再取得時は DB を優先する
+	•	取得したリポジトリは DB に保存（キャッシュ）する。
+	•	次回以降は DB を優先して読み込み, API コールの回数と通信コストを削減する。
+	•	「初回のみ API、2回目以降はキャッシュ利用」構造でパフォーマンス最適化。
+	•	ただし ファイル内容(content) は API からでないと取得できないため例外的に API 優先。
+
+⸻
+
+3. 🔍 リポジトリ検索機能を実装する
+	•	キャッシュ済みデータ（DB）を対象に検索可能にすることで、高速検索を実現。
+	•	ユーザー体験向上のため、検索候補サジェストも実装。
+	•	大量のデータでもストレスなく検索可能な UI/UX を意識。
+
+⸻
+
+4. ⭐ お気に入り（Favorite）機能をつける
+	•	各リポジトリに対して「お気に入り」を付与できる。
+	•	お気に入り状態は UserRepository テーブルで管理。
+	•	ブラウザ閉じた時に自動保存されるようにし、保存操作を意識させない設計。
+	•	保存はバルクインサートで一括処理して DB 負荷を軽減。
+
+⸻
+
+5. 🏷️ タグ機能を実装する
+	•	リポジトリにユーザー固有のタグを紐づけできる。
+
+⸻
+
+   
 ## 💡 工夫した点
 
 - 一度閲覧したリポジトリの情報は、**バルクインサート**のようにまとめてDBに保存し、  
@@ -89,6 +131,109 @@ AI に依存しすぎない開発体制を整える。
 
 LLM に任せるのではなく、  
 **「自分が後で修正できるコードか」** を基準に使いこなす姿勢を徹底していく。
+
+4. テーブル設計で RDB の強みを活かせていなかった反省
+
+今回の開発を通して、リレーショナルデータベース（RDB）の本来の強みを十分に活かせていなかった ことに気づきました。
+	•	既存のテーブル設計では、正規化が十分に行われていなかった
+	•	1つのエンティティ（例：Repository, Tag, User）に対して、
+複数の関連データを持たせる設計ができておらず,
+RDBを使用する意味が曖昧な状態で開発が進んでいた
+	•	その結果、データの拡張性・柔軟性が低く、
+機能追加のたびにテーブル見直しが必要になる構造だった
+
+この問題を改善するために、
+中間テーブルを活用し、多対多の関係を正しく表現する設計へ全面的に作り直しました。
+
+その結果、
+	•	1つのデータ（User, Repository）に対して複数のタグを持たせたり
+	•	同じリポジトリに複数ユーザーがタグ付けしたり
+	•	お気に入り状態やタグ付け状態を柔軟に管理できる
+
+といった、RDB の強みを最大限活かした拡張性の高いアーキテクチャを実現できました。
+
+今回の作り直しを通じて、
+
+「RDB は中間テーブルを使って、関係を柔軟に表現できるからこそ強い」
+
+ということを深く理解できました。
+これまであまり意識できていなかったポイントで、非常に大きな学びとなりました。
+
+##newModel.goより(model.goを改善してみました。)
+
+type User struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	Username  string    `gorm:"uniqueIndex;not null" json:"username"`
+	Email     string    `gorm:"uniqueIndex;not null" json:"email"`
+	Password  string    `gorm:"not null" json:"-"` // JSONには含めない
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// Tag テーブル - ユーザー固有のタグ
+type Tag struct {
+	ID     uint   `gorm:"primaryKey" json:"id"`
+	UserID uint   `gorm:"index;not null" json:"user_id"`
+	Name   string `gorm:"not null" json:"name"`
+	Color  string `gorm:"default:#3498db" json:"color"` // タグの色
+
+	// 外部キー制約
+	User User `gorm:"foreignKey:UserID" json:"user,omitempty"`
+
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+
+	// 複合ユニークインデックス（同じユーザーが同じ名前のタグを複数作成できない）
+	_ struct{} `gorm:"uniqueIndex:user_tag_name,user_id,name"`
+}
+
+// UserRepository テーブル - ユーザーとリポジトリの関連（お気に入り等）
+type UserRepository struct {
+	ID           uint `gorm:"primaryKey" json:"id"`
+	UserID       uint `gorm:"index;not null" json:"user_id"`
+	RepositoryID uint `gorm:"index;not null" json:"repository_id"`
+	IsFavorite   bool `gorm:"default:false" json:"is_favorite"`
+
+	// 外部キー制約
+	User       User       `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	Repository Repository `gorm:"foreignKey:RepositoryID" json:"repository,omitempty"`
+
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+
+	// 複合ユニークインデックス（同じユーザーが同じリポジトリを複数回関連付けできない）
+	_ struct{} `gorm:"uniqueIndex:user_repository,user_id,repository_id"`
+}
+
+// RepositoryTag テーブル - リポジトリとタグの多対多関係
+type RepositoryTag struct {
+	ID           uint `gorm:"primaryKey" json:"id"`
+	UserID       uint `gorm:"index;not null" json:"user_id"`
+	RepositoryID uint `gorm:"index;not null" json:"repository_id"`
+	TagID        uint `gorm:"index;not null" json:"tag_id"`
+
+	// 外部キー制約
+	User       User       `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	Repository Repository `gorm:"foreignKey:RepositoryID" json:"repository,omitempty"`
+	Tag        Tag        `gorm:"foreignKey:TagID" json:"tag,omitempty"`
+
+	CreatedAt time.Time `json:"created_at"`
+
+	// 複合ユニークインデックス
+	_ struct{} `gorm:"uniqueIndex:user_repo_tag,user_id,repository_id,tag_id"`
+}
+
+// 既存のRepository構造体を修正
+type newRepository struct {
+	ID            uint   `gorm:"primaryKey" json:"id"`
+	Name          string `gorm:"index;not null" json:"name"`
+	FullName      string `gorm:"uniqueIndex;not null" json:"full_name"`
+	DefaultBranch string `json:"default_branch"`
+	// Tag フィールドを削除（多対多関係で管理）
+	Owner     Owner     `gorm:"embedded;embeddedPrefix:owner_" json:"owner"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
 
 ---
 ## 📝 要件定義とテーブル設計に関する振り返り
@@ -201,84 +346,4 @@ LLM を使いこなすスキルも並行して高めていく。
 - envなどの扱い方や、チーム開発におけるenvの共有の仕方などを知ることができた。
 
 
-## テーブル設計においての今回の失敗
--既存のテーブルでは正規化を全然考慮することができなかった。なので、後日勉強したことを記します。。
--model全体的に1つのidに対して複数のデータをもたせられていないため、データベースの役割が不明確な状態でプロダクトを進めていたことがわかった。
--なので、1つのデータに対して、複数のデータを持てるように、中間テーブルを使うことで、リレーショナルデータベースの強みというのを意識してテーブル設計することが、拡張性や、アプリケーションの質を大幅に飛躍させることができることが実感を持てた。(今までRDBの強みを意識してやってなかったのですごく勉強になった。)
-
-##newModel.goより(model.goを改善した。)
-
-type User struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	Username  string    `gorm:"uniqueIndex;not null" json:"username"`
-	Email     string    `gorm:"uniqueIndex;not null" json:"email"`
-	Password  string    `gorm:"not null" json:"-"` // JSONには含めない
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
-
-// Tag テーブル - ユーザー固有のタグ
-type Tag struct {
-	ID     uint   `gorm:"primaryKey" json:"id"`
-	UserID uint   `gorm:"index;not null" json:"user_id"`
-	Name   string `gorm:"not null" json:"name"`
-	Color  string `gorm:"default:#3498db" json:"color"` // タグの色
-
-	// 外部キー制約
-	User User `gorm:"foreignKey:UserID" json:"user,omitempty"`
-
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-
-	// 複合ユニークインデックス（同じユーザーが同じ名前のタグを複数作成できない）
-	_ struct{} `gorm:"uniqueIndex:user_tag_name,user_id,name"`
-}
-
-// UserRepository テーブル - ユーザーとリポジトリの関連（お気に入り等）
-type UserRepository struct {
-	ID           uint `gorm:"primaryKey" json:"id"`
-	UserID       uint `gorm:"index;not null" json:"user_id"`
-	RepositoryID uint `gorm:"index;not null" json:"repository_id"`
-	IsFavorite   bool `gorm:"default:false" json:"is_favorite"`
-
-	// 外部キー制約
-	User       User       `gorm:"foreignKey:UserID" json:"user,omitempty"`
-	Repository Repository `gorm:"foreignKey:RepositoryID" json:"repository,omitempty"`
-
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-
-	// 複合ユニークインデックス（同じユーザーが同じリポジトリを複数回関連付けできない）
-	_ struct{} `gorm:"uniqueIndex:user_repository,user_id,repository_id"`
-}
-
-// RepositoryTag テーブル - リポジトリとタグの多対多関係
-type RepositoryTag struct {
-	ID           uint `gorm:"primaryKey" json:"id"`
-	UserID       uint `gorm:"index;not null" json:"user_id"`
-	RepositoryID uint `gorm:"index;not null" json:"repository_id"`
-	TagID        uint `gorm:"index;not null" json:"tag_id"`
-
-	// 外部キー制約
-	User       User       `gorm:"foreignKey:UserID" json:"user,omitempty"`
-	Repository Repository `gorm:"foreignKey:RepositoryID" json:"repository,omitempty"`
-	Tag        Tag        `gorm:"foreignKey:TagID" json:"tag,omitempty"`
-
-	CreatedAt time.Time `json:"created_at"`
-
-	// 複合ユニークインデックス
-	_ struct{} `gorm:"uniqueIndex:user_repo_tag,user_id,repository_id,tag_id"`
-}
-
-// 既存のRepository構造体を修正
-type newRepository struct {
-	ID            uint   `gorm:"primaryKey" json:"id"`
-	Name          string `gorm:"index;not null" json:"name"`
-	FullName      string `gorm:"uniqueIndex;not null" json:"full_name"`
-	DefaultBranch string `json:"default_branch"`
-	// Tag フィールドを削除（多対多関係で管理）
-	Owner     Owner     `gorm:"embedded;embeddedPrefix:owner_" json:"owner"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
 
