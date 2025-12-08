@@ -2,7 +2,7 @@ package model
 
 import "time"
 
-// User テーブル - ログイン機能
+// User テーブル - ログイン機能(作ってないけど、将来的に必要になる！！！)
 type User struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	Username  string    `gorm:"uniqueIndex;not null" json:"username"`
